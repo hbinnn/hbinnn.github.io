@@ -20,28 +20,37 @@
     var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="hbinnn&#39;s Blog">
-<meta property="og:url" content="http://hbinnn.github.io/index.html">
+  <meta name="description" content="介绍如何通过命令行在Windows与Linux下配置tcp流量的端口转发。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows与Linux下的端口转发">
+<meta property="og:url" content="http://hbinnn.github.io/2022/01/23/Windows%E4%B8%8ELinux%E4%B8%8B%E7%9A%84%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91/index.html">
 <meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="介绍如何通过命令行在Windows与Linux下配置tcp流量的端口转发。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/55afd069e4f1ba01d87cee0b9322c6c7.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/ac586d71025972c3c200ca6bc96917c5.png">
+<meta property="article:published_time" content="2022-01-23T15:45:54.000Z">
+<meta property="article:modified_time" content="2022-01-23T15:50:49.073Z">
 <meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="端口转发">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/55afd069e4f1ba01d87cee0b9322c6c7.png">
 
-<link rel="canonical" href="http://hbinnn.github.io/">
+<link rel="canonical" href="http://hbinnn.github.io/2022/01/23/Windows%E4%B8%8ELinux%E4%B8%8B%E7%9A%84%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>hbinnn's Blog</title>
+  <title>Windows与Linux下的端口转发 | hbinnn's Blog</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
     <script>
@@ -149,9 +158,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -167,10 +177,9 @@
       <meta itemprop="name" content="hbinnn's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/01/23/Windows%E4%B8%8ELinux%E4%B8%8B%E7%9A%84%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91/" class="post-title-link" itemprop="url">Windows与Linux下的端口转发</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          Windows与Linux下的端口转发
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -207,6 +216,7 @@
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
               <span>4 分钟</span>
             </span>
+            <div class="post-description">介绍如何通过命令行在Windows与Linux下配置tcp流量的端口转发。</div>
 
         </div>
       </header>
@@ -217,119 +227,131 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>介绍如何通过命令行在Windows与Linux下配置tcp流量的端口转发。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/01/23/Windows%E4%B8%8ELinux%E4%B8%8B%E7%9A%84%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
+        <blockquote>
+<p>主要涉及的命令有 netsh 与 iptables。</p>
+</blockquote>
+<h2 id="netsh"><a href="#netsh" class="headerlink" title="netsh"></a>netsh</h2><p>曾经遇到过这样一个场景：</p>
+<p>PC 可以与 linux1、linux2 互通，但是 linux1 与 linux2 之间不通，linux1 直接访问 linux2 无法成功，也无法通过添加路由的方式访问。此时可以利用 PC 配置端口转发达到访问的目的。</p>
+<p>利用 Windows 下的 netsh 命令来配置网络端口转发的功能。</p>
+<p><code>netsh interface portproxy add v4tov4 listenaddress=address listenport=port connectaddress=destaddress connectport=destport protocol=tcp</code></p>
+<ul>
+<li>listenaddress：监听地址；</li>
+<li>listenport：监听端口；</li>
+<li>connectaddress：端口转发需要连接的目的地址；</li>
+<li>connectport：端口转发需要连接的目的端口；</li>
+</ul>
+<p>配置端口转发之后，连接到 listenaddress:listenport 的 tcp 流量就会被转发到 connectaddress:connectport 中。</p>
+<p>查看系统中所有转发规则是否生效：<code>netsh interface portproxy show all</code>；</p>
+<p>查看端口转发的设置：<code>netsh interface portproxy dump</code>；</p>
+<p>删掉一个特定的端口转发规则：<code>netsh interface portproxy delete v4tov4</code>；</p>
+<p>清空当前所有的配置规则：<code>netsh interface portproxy reset</code>；</p>
+<h2 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h2><p>iptables 是 Linux 下的一个包过滤防火墙管理工具，通过设置过滤规则实现对数据包进出设备以及转发的控制。</p>
+<p>iptables 维护着 4 个表和 5 个链，所有的防火墙策略规则都会被写入这些表和链中。</p>
+<p>4 个表主要指的是：</p>
+<ul>
+<li>filter 表：控制数据包是否允许放行，可以控制的链路有 INPUT、FORWARD 和 OUTPUT。</li>
+<li>nat 表：控制数据包中地址转换，可以控制的链路有 PREROUTING、INPUT、OUTPUT 和 POSTROUTING。属于同一个流的包只会经过这个表一次。</li>
+<li>mangle：修改数据包中的原数据，可以控制的链路有 PREROUTING、INPUT、OUTPUT、FORWARD 和 POSTROUTING。主要用于修改数据包的TOS(Type Of Service，服务类型)、TTL(Time To Live，生存周期)指以及为数据包设置Mark标记，以实现Qos(Quality Of Service，服务质量)调整以及策略路由等应用。</li>
+<li>raw：控制数据包是否被状态跟踪机制处理，可以控制的链路有 PREROUTING、OUTPUT。</li>
+</ul>
+<p>5个链主要指的是：</p>
+<ul>
+<li><p>INPUT：进来的数据包应用此规则链中的策略</p>
+</li>
+<li><p>OUTPUT：外出的数据包应用此规则链中的策略</p>
+</li>
+<li><p>FORWARD：转发数据包时应用此规则链中的策略</p>
+</li>
+<li><p>PREROUTING：对进来的数据包作路由选择前应用此链中的规则</p>
+</li>
+<li><p>POSTROUTING：对外出的数据包作路由选择后应用此链中的规则</p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/55afd069e4f1ba01d87cee0b9322c6c7.png" alt="hook point chain - table"></p>
+<p>数据报文必须按顺序匹配这些链上的规则。每条链上的各个表的匹配顺序为：raw→mangle→nat→filter。</p>
+<p>数据包通过防火墙的流程可以总结为：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/ac586d71025972c3c200ca6bc96917c5.png" alt="iptables dataflo"></p>
+<p>iptables的命令主要格式如下：</p>
+<p><code>iptables [-t 表名] command 匹配规则  </code>  </p>
+<p>常用命令选项：</p>
+<ul>
+<li>-A    添加防火墙规则</li>
+<li>-D    删除防火墙规则</li>
+<li>-I    插入防火墙规则</li>
+<li>-F    清空防火墙规则</li>
+<li>-L    列出添加防火墙规则</li>
+<li>-R    替换防火墙规则</li>
+<li>-Z    清空防火墙数据表统计信息</li>
+<li>-P    设置链默认规则</li>
+</ul>
+<p>常用匹配参数：</p>
+<ul>
+<li>[!]-p    匹配协议，! 表示取反</li>
+<li>[!]-s    匹配源地址</li>
+<li>[!]-d    匹配目标地址</li>
+<li>[!]-i    匹配入站网卡接口</li>
+<li>[!]-o    匹配出站网卡接口</li>
+<li>[!]–sport    匹配源端口</li>
+<li>[!]–dport    匹配目标端口</li>
+<li>[!]–src-range    匹配源地址范围</li>
+<li>[!]–dst-range    匹配目标地址范围</li>
+<li>[!]–limit    四配数据表速率</li>
+<li>[!]–mac-source    匹配源MAC地址</li>
+<li>[!]–sports    匹配源端口</li>
+<li>[!]–dports    匹配目标端口</li>
+<li>[!]–stste    匹配状态（INVALID、ESTABLISHED、NEW、RELATED)</li>
+<li>[!]–string    匹配应用层字串</li>
+</ul>
+<p>匹配规则触发动作：</p>
+<ul>
+<li>ACCEPT    允许数据包通过</li>
+<li>DROP    丢弃数据包</li>
+<li>REJECT    拒绝数据包通过</li>
+<li>LOG    将数据包信息记录 syslog 曰志</li>
+<li>DNAT    目标地址转换</li>
+<li>SNAT    源地址转换</li>
+<li>MASQUERADE    地址欺骗</li>
+<li>REDIRECT    重定向</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9bfb92e8fc26">Windows端口转发(Port Forwarding in Windows) - 简书 (jianshu.com)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.xiebruce.top/1071.html">iptables详解 | Bruce’s Blog (xiebruce.top)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ee4ee15d3658">iptables详解及一些常用规则 - 简书 (jianshu.com)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_15169172/2710200">Linux iptables命令详解【图文】_wx607823dfcf6a9_51CTO博客</a></p>
+</li>
+</ul>
+
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91/" rel="tag"># 端口转发</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/01/23/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="hbinnn">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="hbinnn's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/01/23/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" class="post-title-link" itemprop="url">文件系统</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-01-23 15:21:18 / 修改时间：23:46:55" itemprop="dateCreated datePublished" datetime="2022-01-23T15:21:18+08:00">2022-01-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>11k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>21 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>介绍文件系统是什么、数据是如何布局以及实现方式。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/01/23/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/23/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" rel="prev" title="文件系统">
+      <i class="fa fa-chevron-left"></i> 文件系统
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
       </footer>
+    
   </article>
   
   
-  
-
-
   
 
 
@@ -382,6 +404,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#netsh"><span class="nav-number">1.</span> <span class="nav-text">netsh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iptables"><span class="nav-number">2.</span> <span class="nav-text">iptables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
