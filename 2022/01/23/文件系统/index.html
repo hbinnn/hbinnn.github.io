@@ -27,7 +27,7 @@
 <meta property="og:site_name" content="hbinnn&#39;s Blog">
 <meta property="og:description" content="介绍文件系统是什么、数据是如何布局以及实现方式。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F-16417203865871.svg">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220331000540790.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108220220539.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220413575.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220438569.png">
@@ -38,8 +38,8 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416524200372">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165523035834">
-<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522678532">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522425330">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522678532">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522157828">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521838926">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521478524">
@@ -57,11 +57,11 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551836756">
 <meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551798434">
 <meta property="article:published_time" content="2022-01-23T07:21:18.000Z">
-<meta property="article:modified_time" content="2022-01-23T15:46:55.144Z">
+<meta property="article:modified_time" content="2022-03-30T16:22:48.999Z">
 <meta property="article:author" content="hbinnn">
 <meta property="article:tag" content="文件系统">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F-16417203865871.svg">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220331000540790.png">
 
 <link rel="canonical" href="http://hbinnn.github.io/2022/01/23/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
 
@@ -213,10 +213,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-01-23 15:21:18 / 修改时间：23:46:55" itemprop="dateCreated datePublished" datetime="2022-01-23T15:21:18+08:00">2022-01-23</time>
+              <time title="创建时间：2022-01-23 15:21:18" itemprop="dateCreated datePublished" datetime="2022-01-23T15:21:18+08:00">2022-01-23</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-31 00:22:48" itemprop="dateModified" datetime="2022-03-31T00:22:48+08:00">2022-03-31</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -254,12 +260,11 @@
 
       
         <blockquote>
-<p>文章主要摘自博客以及现代操作系统第四章，顺序可能略有调整。</p>
+<p>文章主要摘自博客以及现代操作系统第四章，顺序略有调整。</p>
 <p>博客原文链接:<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/qJdoXTv_XS_4ts9YuzMNIw">https://mp.weixin.qq.com/s/qJdoXTv_XS_4ts9YuzMNIw</a></p>
 <p>作者:小林coding</p>
 </blockquote>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F-16417203865871.svg" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220331000540790.png" alt="image-20220331000540790"></p>
 <h2 id="为什么要有文件系统"><a href="#为什么要有文件系统" class="headerlink" title="为什么要有文件系统"></a>为什么要有文件系统</h2><ul>
 <li>进程的存储容量受到虚拟地址空间大小的限制；</li>
 <li>有些信息需要持久保留；</li>
@@ -269,9 +274,9 @@
 <p>文件系统的<strong>基本数据单位是文件</strong>，它的目的是对磁盘上的文件进行组织管理，<strong>组织的方式不同，就会形成不同的文件系统</strong>。</p>
 <h2 id="文件系统类型"><a href="#文件系统类型" class="headerlink" title="文件系统类型"></a>文件系统类型</h2><p>Linux 支持的文件系统也不少，根据存储位置的不同，可以把文件系统分为三类：</p>
 <ul>
-<li><em>磁盘的文件系统</em>，它是直接把数据存储在<strong>磁盘</strong>中，比如 Ext 2/3/4、XFS 等都是这类文件系统。</li>
-<li><em>内存的文件系统</em>，这类文件系统的数据不是存储在硬盘的，而是占用<strong>内存空间</strong>，我们经常用到的 <code>/proc</code> 和 <code>/sys</code> 文件系统都属于这一类，读写这类文件，实际上是读写内核中相关的数据数据。</li>
-<li><em>网络的文件系统</em>，用来访问<strong>其他计算机主机数据</strong>的文件系统，比如 NFS、SMB 等等</li>
+<li>磁盘的文件系统，它是直接把数据存储在<strong>磁盘</strong>中，比如 Ext 2/3/4、XFS 等都是这类文件系统。</li>
+<li>内存的文件系统，这类文件系统的数据不是存储在硬盘的，而是占用<strong>内存空间</strong>，我们经常用到的 <code>/proc</code> 和 <code>/sys</code> 文件系统都属于这一类，读写这类文件，实际上是读写内核中相关的数据数据。</li>
+<li>网络的文件系统，用来访问<strong>其他计算机主机数据</strong>的文件系统，比如 NFS、SMB 等等</li>
 </ul>
 <h2 id="文件"><a href="#文件" class="headerlink" title="文件"></a>文件</h2><p>文件是进程创建的信息逻辑单元。</p>
 <h3 id="文件命名"><a href="#文件命名" class="headerlink" title="文件命名"></a>文件命名</h3><p>有些文件系统不区分文件名大小写字母，如 MS-DOS，有些则区分，如 UNIX。</p>
@@ -286,13 +291,10 @@
 <li>顺序访问，从头开始读取文件的全部字节，不能跳过某一些内容，也无法不按顺序读取；</li>
 <li>随机访问文件，以任意次序读取文件的字节；</li>
 </ul>
-<h3 id="文件属性"><a href="#文件属性" class="headerlink" title="文件属性"></a>文件属性</h3><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108220220539.png" alt="image-20220108220220539" style="zoom:67%;" />
-
-<h3 id="文件使用"><a href="#文件使用" class="headerlink" title="文件使用"></a>文件使用</h3><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220413575.png" alt="image-20220104220413575" style="zoom:50%;" />
-
+<h3 id="文件属性"><a href="#文件属性" class="headerlink" title="文件属性"></a>文件属性</h3><p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108220220539.png"></p>
+<h3 id="文件使用"><a href="#文件使用" class="headerlink" title="文件使用"></a>文件使用</h3><p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220413575.png"></p>
 <p>我们打开了一个文件后，操作系统会跟踪进程打开的所有文件，所谓的跟踪，就是操作系统为每个进程维护一个打开文件表，文件表里的每一项代表「<strong>文件描述符</strong>」。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220438569.png" alt="image-20220104220438569" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220438569.png"></p>
 <p>操作系统在打开文件表中维护着打开文件的状态和信息：</p>
 <ul>
 <li>文件指针：系统跟踪上次读写位置作为当前文件位置指针，这种指针对打开文件的<strong>某个进程来说是唯一</strong>的；</li>
@@ -311,13 +313,18 @@
 <p>磁盘的 0 号扇区成为主引导记录（Master Boot Record，MBR），MBR 的结尾是分区表，记录着每个分区的起始和结束地址。</p>
 <p>分区表中的一个分区被标记为活动分区，它的第一个块被称为引导块，引导块中的程序将装载该分区中的操作系统。</p>
 <p>从引导块开始，不同的文件系统，磁盘分区的布局也不一样的。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108220858810.png" alt="image-20220108220858810" style="zoom:80%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108220858810.png" alt="image"></p>
 <h3 id="文件系统如何读写磁盘"><a href="#文件系统如何读写磁盘" class="headerlink" title="文件系统如何读写磁盘"></a>文件系统如何读写磁盘</h3><p>磁盘读写的最小单位是<strong>扇区</strong>，扇区的大小只有 <code>512B</code> 大小。</p>
 <p>对文件系统而言，如果每次读写都以扇区为单位，那读写的效率会非常低。</p>
-<p>所以，文件系统把多个扇区组成了一个<strong>逻辑块</strong>，每次读写的最小单位就是逻辑块（数据块），Linux 中的逻辑块大小为 <code>4KB</code>，也就是一次性读写 8 个扇区，这将大大提高了磁盘的读写的效率。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220147068.png" alt="image-20220104220147068" style="zoom: 50%;" />
-
+<p>所以，文件系统把多个扇区组成了一个<strong>逻辑块</strong>，每次读写的最小单位就是逻辑块，Linux 中的逻辑块大小为 <code>4KB</code>，也就是一次性读写 8 个扇区，这将大大提高了磁盘的读写的效率。</p>
+<p>Linux 文件系统会为每个文件分配两个数据结构：<strong>索引节点（index node）</strong>和<strong>目录项（directory entry）</strong>，它们主要用来记录文件的元信息和目录层次结构。</p>
+<ul>
+<li>索引节点，也就是 <code>inode</code> 用来记录文件的元信息，比如 <code>inode</code> 编号、文件大小、访问权限、创建时间、修改时间、数据在磁盘的位置等等。索引节点是文件的<strong>唯一</strong>标识，它们之间一一对应，也同样都会被存储在硬盘中，所以<strong>索引节点同样占用磁盘空间</strong>。</li>
+<li>目录项，也就是 <code>dentry</code>，用来记录文件的名字、索引节点指针以及与其他目录项的层级关联关系。多个目录项关联起来，就会形成目录结构，但它与索引节点不同的是，<strong>目录项是由内核维护的一个数据结构，不存放于磁盘，而是缓存在内存</strong>。</li>
+</ul>
+<p>目录项和索引节点的关系是<strong>多对一</strong>。</p>
+<p>目录也是文件，也是用索引节点唯一标识，和普通文件不同的是，普通文件在磁盘里面保存的是<strong>文件数据</strong>，而目录文件在磁盘里面保存<strong>子目录或文件</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220147068.png"></p>
 <p>索引节点是存储在硬盘上的数据，那么为了加速文件的访问，通常会把索引节点加载到内存中。</p>
 <ul>
 <li><p><em>超级块</em>，用来存储文件系统的详细信息，比如块个数、块大小、空闲块等等。</p>
@@ -332,15 +339,6 @@
 <li>超级块：<strong>当文件系统挂载时进入内存</strong>；</li>
 <li>索引节点区：<strong>当文件被访问时进入内存</strong>；</li>
 </ul>
-<blockquote>
-<p>Linux 文件系统会为每个文件分配两个数据结构：<strong>索引节点（index node）</strong>和<strong>目录项（directory entry）</strong>，它们主要用来记录文件的元信息和目录层次结构。</p>
-<ul>
-<li>索引节点，也就是 <code>inode</code>（上图中的i节点）用来记录文件的元信息，比如 <code>inode</code> 编号、文件大小、访问权限、创建时间、修改时间、数据在磁盘的位置等等。索引节点是文件的<strong>唯一</strong>标识，它们之间一一对应，也同样都会被存储在硬盘中，所以<strong>索引节点同样占用磁盘空间</strong>。</li>
-<li>目录项，也就是 <code>dentry</code>，用来记录文件的名字、索引节点指针以及与其他目录项的层级关联关系。多个目录项关联起来，就会形成目录结构，但它与索引节点不同的是，<strong>目录项是由内核维护的一个数据结构，不存放于磁盘，而是缓存在内存</strong>。</li>
-</ul>
-<p>目录项和索引节点的关系是<strong>多对一</strong>。</p>
-<p>目录也是文件，也是用索引节点唯一标识，和普通文件不同的是，普通文件在磁盘里面保存的是<strong>文件数据</strong>，而目录文件在磁盘里面保存<strong>子目录或文件</strong>。</p>
-</blockquote>
 <h3 id="文件存储"><a href="#文件存储" class="headerlink" title="文件存储"></a>文件存储</h3><p>文件的数据是要存储在硬盘上面的，数据在磁盘上的存放方式，就像程序在内存中存放的方式那样，有以下两种：</p>
 <ul>
 <li>连续空间存放方式</li>
@@ -355,34 +353,29 @@
 </ul>
 <p>所以，<strong>文件头里需要指定「起始块的位置」和「长度」</strong>，有了这两个信息就可以很好的表示文件存放方式是一块连续的磁盘空间。</p>
 <p>注意，此处说的文件头，就类似于 Linux 的 inode。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220858604.png" alt="image-20220104220858604" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220858604.png"></p>
 <p>连续空间存放的方式虽然读写效率高，<strong>但是有「磁盘空间碎片」和「文件长度不易扩展」的缺陷</strong>。</p>
 <p>必须先知道一个文件的大小，这样文件系统才会根据文件的大小在磁盘上找到一块连续的空间分配给文件。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220912957.png" alt="image-20220104220912957" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220912957.png"></p>
 <blockquote>
 <p>对一些只读文件系统，连续空间存放的方案反而比较高效。CD-ROM、DVD 等。</p>
 </blockquote>
 <h4 id="非连续空间存放方式"><a href="#非连续空间存放方式" class="headerlink" title="非连续空间存放方式"></a>非连续空间存放方式</h4><p>非连续空间存放方式分为「链表方式」和「索引方式」。</p>
 <h5 id="链表方式"><a href="#链表方式" class="headerlink" title="链表方式"></a>链表方式</h5><p>链表的方式存放是<strong>离散的，不用连续的</strong>，于是就可以<strong>消除磁盘碎片</strong>，可大大提高磁盘空间的利用率，同时<strong>文件的长度可以动态扩展</strong>。根据实现的方式的不同，链表可分为「<strong>隐式链表</strong>」和「<strong>显式链接</strong>」两种形式。</p>
 <h6 id="隐式链表"><a href="#隐式链表" class="headerlink" title="隐式链表"></a>隐式链表</h6><p>文件要以「<strong>隐式链表</strong>」的方式存放的话，<strong>实现的方式是文件头要包含「第一块」和「最后一块」的位置，并且每个数据块里面留出一个指针空间，用来存放下一个数据块的位置</strong>，这样一个数据块连着一个数据块，从链头开是就可以顺着指针找到所有的数据块，所以存放的方式可以是不连续的。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640" alt="图片" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640"></p>
 <p>隐式链表的存放方式的<strong>缺点在于无法直接访问数据块，只能通过指针顺序访问文件，以及数据块指针消耗了一定的存储空间</strong>。</p>
 <p>另一方面，由于指针占用了一些字节，每个磁盘块中存储数据的字节数不再是2的整数次幂，对于以长度为2的整数次幂来读写磁盘块的程序而言，降低了运行效率。</p>
 <h6 id="显式链接"><a href="#显式链接" class="headerlink" title="显式链接"></a>显式链接</h6><p>如果取出每个磁盘块的指针，把它放在内存的一个表中，就可以解决上述隐式链表的两个不足。那么，这种实现方式是「<strong>显式链接</strong>」，它指<strong>把用于链接文件各数据块的指针，显式地存放在内存的一张链接表中</strong>，该表在整个磁盘仅设置一张，<strong>每个表项中存放链接指针，指向下一个数据块号</strong>。</p>
 <p>对于显式链接的工作方式，我们举个例子，文件 A 依次使用了磁盘块 4、7、2、10 和 12 ，文件 B 依次使用了磁盘块 6、3、11 和 14 。利用下图中的表，可以从第 4 块开始，顺着链走到最后，找到文件 A 的全部磁盘块。同样，从第 6 块开始，顺着链走到最后，也能够找出文件 B 的全部磁盘块。最后，这两个链都以一个不属于有效磁盘编号的特殊标记（如 -1 ）结束。内存中的这样一个表格称为<strong>文件分配表（File Allocation Table，FAT）</strong>。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416524200372" alt="图片" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416524200372"></p>
 <p>由于查找记录的过程是在内存中进行的，因而不仅显著地<strong>提高了检索速度</strong>，而且<strong>大大减少了访问磁盘的次数</strong>。但也正是整个表都存放在内存中的关系，它的主要的缺点是<strong>不适用于大磁盘</strong>。</p>
 <p>比如，对于 200GB 的磁盘和 1KB 大小的块，这张表需要有 2 亿项，每一项对应于这 2 亿个磁盘块中的一个块，每项如果需要 4 个字节，那这张表要占用 800MB 内存，很显然 FAT 方案对于大磁盘而言不太合适。</p>
 <h5 id="索引方式"><a href="#索引方式" class="headerlink" title="索引方式"></a>索引方式</h5><p>链表的方式解决了连续分配的磁盘碎片和文件动态扩展的问题，但是不能有效支持直接访问（FAT除外），索引的方式可以解决这个问题。</p>
 <p>索引的实现是为每个文件创建一个「<strong>索引数据块</strong>」，里面存放的是<strong>指向文件数据块的指针列表</strong>，说白了就像书的目录一样，要找哪个章节的内容，看目录查就可以。</p>
 <p>另外，<strong>文件头需要包含指向「索引数据块」的指针</strong>，这样就可以通过文件头知道索引数据块的位置，再通过索引数据块里的索引信息找到对应的数据块。</p>
 <p>创建文件时，索引块的所有指针都设为空。当首次写入第 i 块时，先从空闲空间中取得一个块，再将其地址写到索引块的第 i 个条目。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165523035834" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165523035834"></p>
 <p>索引的方式优点在于：</p>
 <ul>
 <li>文件的创建、增大、缩小很方便；</li>
@@ -393,17 +386,13 @@
 <p>如果文件很大，大到一个索引数据块放不下索引信息，这时又要如何处理大文件的存放呢？我们可以通过组合的方式，来处理大文件的存。</p>
 <p>先来看看链表 + 索引的组合，这种组合称为「<strong>链式索引块</strong>」，它的实现方式是<strong>在索引数据块留出一个存放下一个索引数据块的指针</strong>，于是当一个索引数据块的索引信息用完了，就可以通过指针的方式，找到下一个索引数据块的信息。</p>
 <p>这种方式也会出现前面提到的链表方式的问题。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522678532" alt="图片" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522425330"></p>
 <p>还有另外一种组合方式是索引 + 索引的方式，这种组合称为「<strong>多级索引块</strong>」，实现方式是<strong>通过一个索引块来存放多个索引数据块</strong>，一层套一层索引。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522425330" alt="图片" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522678532"></p>
 <h3 id="Unix-文件存储方式"><a href="#Unix-文件存储方式" class="headerlink" title="Unix 文件存储方式"></a>Unix 文件存储方式</h3><p>我们先把前面提到的文件存储方式，做个比较：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522157828" alt="图片" style="zoom: 67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165522157828"></p>
 <p>那早期 Unix 文件系统是组合了前面的文件存放方式的优点，如下图：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521838926" alt="图片" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521838926"></p>
 <p>它是<strong>根据文件的大小，存放的方式会有所变化</strong>：</p>
 <ul>
 <li>如果存放文件所需的数据块小于 10 块，则采用直接查找的方式；</li>
@@ -427,8 +416,7 @@
 <p>和普通文件不同的是，<strong>普通文件的块里面保存的是文件数据，而目录文件的块里面保存的是目录里面一项一项的文件信息。</strong></p>
 <p>在目录文件的块中，最简单的保存格式就是<strong>列表</strong>，就是一项一项地将目录下的文件信息（如文件名、文件 inode、文件类型等）列在表里。</p>
 <p>列表中每一项就代表该目录下的文件的文件名和对应的 inode，通过这个 inode，就可以找到真正的文件。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521478524" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521478524"></p>
 <p>通常，第一项是「<code>.</code>」，表示当前目录，第二项是「<code>..</code>」，表示上一级目录，接下来就是一项一项的文件名和 inode。</p>
 <p>如果一个目录有超级多的文件，我们要想在这个目录下找文件，按照列表一项一项的找，效率就不高了。</p>
 <p>于是，保存目录的格式改成<strong>哈希表</strong>，对文件名进行哈希计算，把哈希值保存起来，如果我们要查找一个目录下面的文件名，可以通过名称取哈希。如果哈希能够匹配上，就说明这个文件的信息在相应的块里面。</p>
@@ -440,13 +428,11 @@
 <li>位图法</li>
 </ul>
 <h4 id="空闲表法"><a href="#空闲表法" class="headerlink" title="空闲表法"></a>空闲表法</h4><p>空闲表法就是为所有空闲空间建立一张表，表内容包括空闲区的第一个块号和该空闲区的块个数，注意，这个方式是<strong>连续分配</strong>的。如下图：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521194722" alt="图片" style="zoom: 67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165521194722"></p>
 <p>当请求分配磁盘空间时，系统依次扫描空闲表里的内容，直到找到一个合适的空闲区域为止。当用户撤销一个文件时，系统回收文件空间。这时，也需顺序扫描空闲表，寻找一个空闲表条目并将释放空间的第一个物理块号及它占用的块数填到这个条目中。</p>
 <p>这种方法仅当有少量的空闲区时才有较好的效果。因为，如果存储空间中有着大量的小的空闲区，则空闲表变得很大，这样查询效率会很低。另外，这种分配技术适用于建立连续文件。</p>
 <h4 id="空闲链表法"><a href="#空闲链表法" class="headerlink" title="空闲链表法"></a>空闲链表法</h4><p>我们也可以使用「链表」的方式来管理空闲空间，每一个空闲块里有一个指针指向下一个空闲块，这样也能很方便的找到空闲块并管理起来。如下图：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165520894320" alt="图片" style="zoom: 67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165520894320"></p>
 <p>当创建文件需要一块或几块时，就从链头上依次取下一块或几块。反之，当回收空间时，把这些空闲块依次接到链头上。</p>
 <p>这种技术只要在主存中保存一个指针，令它指向第一个空闲块。其特点是简单，但不能随机访问，工作效率低，因为每当在链上增加或移动空闲块时需要做很多 I/O 操作，同时数据块的指针消耗了一定的存储空间。</p>
 <p>空闲表法和空闲链表法都不适合用于大型文件系统，因为这会使空闲表或空闲链表太大。</p>
@@ -458,8 +444,7 @@
 <p>也就是说按照上面的结构，如果采用「一个块的位图 + 一系列的块」，外加「一个块的 inode 的位图 + 一系列的 inode 的结构」能表示的最大空间也就 <code>128M</code>，这太少了，现在很多文件都比这个大。</p>
 <p>在 Linux 文件系统，把这个结构称为一个<strong>块组</strong>，那么有 N 多的块组，就能够表示 N 大的文件。</p>
 <p>下图给出了 Linux Ext2 整个文件系统的结构和块组的内容，文件系统都由大量块组组成，在硬盘上相继排布：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165520496018" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165520496018"></p>
 <p>最前面的第一个块是引导块，在系统启动时用于启用引导，接着后面就是一个一个连续的块组了，块组的内容如下：</p>
 <ul>
 <li><em>超级块</em>，包含的是文件系统的重要信息，比如 inode 总个数、块总个数、每个块组的 inode 个数、每个块组的块个数等等。</li>
@@ -475,11 +460,9 @@
 </ul>
 <h3 id="软链接和硬链接"><a href="#软链接和硬链接" class="headerlink" title="软链接和硬链接"></a>软链接和硬链接</h3><p>有时候我们希望给某个文件取个别名，那么在 Linux 中可以通过<strong>硬链接（Hard Link）</strong> 和<strong>软链接（Symbolic Link）</strong> 的方式来实现，它们都是比较特殊的文件，但是实现方式也是不相同的。</p>
 <p>硬链接是<strong>多个目录项中的「索引节点」指向一个文件</strong>，也就是指向同一个 inode，但是 inode 是不可能跨越文件系统的，每个文件系统都有各自的 inode 数据结构和列表，所以<strong>硬链接是不可用于跨文件系统的</strong>。由于多个目录项都是指向一个 inode，那么<strong>只有删除文件的所有硬链接以及源文件时，系统才会彻底删除该文件。</strong></p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165520161116" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165520161116"></p>
 <p>软链接相当于重新创建一个文件，这个文件有<strong>独立的 inode</strong>，但是这个<strong>文件的内容是另外一个文件的路径</strong>，所以访问软链接的时候，实际上相当于访问到了另外一个文件，所以<strong>软链接是可以跨文件系统的</strong>，甚至<strong>目标文件被删除了，链接文件还是在的，只不过指向的文件找不到了而已。</strong></p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165519884414" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165519884414"></p>
 <h3 id="日志结构文件系统（Log-structured-File-System-LFS）"><a href="#日志结构文件系统（Log-structured-File-System-LFS）" class="headerlink" title="日志结构文件系统（Log-structured File System, LFS）"></a>日志结构文件系统（Log-structured File System, LFS）</h3><h4 id="促使设计-LFS-的主要原因"><a href="#促使设计-LFS-的主要原因" class="headerlink" title="促使设计 LFS 的主要原因"></a>促使设计 LFS 的主要原因</h4><p>内存容量变大，磁盘高速缓存也在迅速增加，对文件的访问请求就有可能直接从缓存中读取，而不需要访问磁盘。可以推断，未来多数的磁盘访问都是写操作。</p>
 <p>而写操作往往都是零碎的。一个 50us 的磁盘写操作之前常常需要 10ms 的寻道时间以及 4ms 的旋转时间，这样的写操作时效率低下的。</p>
 <h4 id="LFS-的设计思想"><a href="#LFS-的设计思想" class="headerlink" title="LFS 的设计思想"></a>LFS 的设计思想</h4><p>将整个磁盘结构化为一个日志。每个一段时间或是有特殊需要，就将缓存在内存中的所有未决的写操作写入到一个单独的段中，作为在日志末尾的一个邻接段写入磁盘。每一个段的开始都是该段的摘要，内容可能会包括 inode、目录块、数据块等。</p>
@@ -502,8 +485,7 @@
 <p>被写入日志的操作必须时幂等的，意味着只要有必要，它们可以被重复执行而不会带来破坏。</p>
 <h3 id="磁盘配额"><a href="#磁盘配额" class="headerlink" title="磁盘配额"></a>磁盘配额</h3><p>为防止某一个用户占用太多磁盘空间，多用户操作系统常常提供一种强制性的磁盘配额机制。</p>
 <p>其基本思想是系统管理员分配给每个用户拥有的文件和块的最大数量，操作系统确保每个用户不会超过所分配的配额。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220109170631951.png" alt="image-20220109170631951" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220109170631951.png"></p>
 <p>每次添加文件块时，文件所有者所用的数据块也会增加，引发对配额硬限制和软限制检查。可以超出软限制，硬限制不可以超出。</p>
 <blockquote>
 <p>硬限制是指对资源节点和数据块的<strong>绝对限制,在任何情况下都不允许用户超过这个限制</strong>;</p>
@@ -519,16 +501,14 @@
 <p>对前一次备份后没有修改的文件再次备份是一种负担，因而产生了增量转储的思想。简单来说，只对上一次转储后发生变更的数据做备份。</p>
 <p>备份的数据往往较多，在写入磁盘前对其压缩就有必要。但是许多压缩算法，磁盘上的单点问题就能导致所有数据无法解压缩。因此压缩与否需要慎重考虑。</p>
 <h2 id="虚拟文件系统"><a href="#虚拟文件系统" class="headerlink" title="虚拟文件系统"></a>虚拟文件系统</h2><p>文件系统的种类众多，而操作系统希望<strong>对用户提供一个统一的接口（POSIX 接口）</strong>，于是在用户层与文件系统层引入了中间层，这个中间层就称为<strong>虚拟文件系统（Virtual File System，VFS）</strong>。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220335423.png" alt="image-20220104220335423" style="zoom:50%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220104220335423.png"></p>
 <p>其关键思想是抽象出所有文件系统都共有的部分，并且将这部分代码单独放在一层，该层调用底层的实际文件系统来管理数据。</p>
 <p>大多数 VFS 应用本质上是面向对象的。</p>
 <p>当一个文件系统注册时，它做的最基本的工作就是提供一个VFS所需要的函数地址的列表。</p>
 <p>如果一个文件系统装载在 /usr 并且一个进程调用它：</p>
 <p><code>open(&quot;/usr/include/unistd.h&quot;, O_RDONLY)</code></p>
 <p>当解析路径时，VFS 通过目录项搜索文件对应的 inode，通过 inode 获取对应文件系统的操作函数，创建一个 vnode 并存储这些信息，保存在文件描述符中。</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108230459035.png" alt="image-20220108230459035" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220108230459035.png"></p>
 <h2 id="文件-I-O"><a href="#文件-I-O" class="headerlink" title="文件 I/O"></a>文件 I/O</h2><p>文件的读写方式各有千秋，对于文件的 I/O 分类也非常多，常见的有</p>
 <ul>
 <li>缓冲与非缓冲 I/O</li>
@@ -561,26 +541,22 @@
 </ul>
 <h3 id="阻塞与非阻塞-I-O-VS-同步与异步-I-O"><a href="#阻塞与非阻塞-I-O-VS-同步与异步-I-O" class="headerlink" title="阻塞与非阻塞 I/O VS 同步与异步 I/O"></a>阻塞与非阻塞 I/O VS 同步与异步 I/O</h3><p>先来看看<strong>阻塞 I/O</strong>，当用户程序执行 <code>read</code> ，线程会被阻塞，一直等到内核数据准备好，并把数据从内核缓冲区拷贝到应用程序的缓冲区中，当拷贝过程完成，<code>read</code> 才会返回。</p>
 <p>注意，<strong>阻塞等待的是「内核数据准备好」和「数据从内核态拷贝到用户态」这两个过程</strong>。过程如下图：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165519204712" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165519204712"></p>
 <p>知道了阻塞 I/O ，来看看<strong>非阻塞 I/O</strong>，非阻塞的 read 请求在数据未准备好的情况下立即返回，可以继续往下执行，此时应用程序不断轮询内核，直到数据准备好，内核将数据拷贝到应用程序缓冲区，<code>read</code> 调用才可以获取到结果。过程如下图：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165518993510" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-164165518993510"></p>
 <p>注意，<strong>这里最后一次 read 调用，获取数据的过程，是一个同步的过程，是需要等待的过程。这里的同步指的是内核态的数据拷贝到用户程序的缓存区这个过程。</strong></p>
 <p>举个例子，访问管道或 socket 时，如果设置了 <code>O_NONBLOCK</code> 标志，那么就表示使用的是非阻塞 I/O 的方式访问，而不做任何设置的话，默认是阻塞 I/O。</p>
 <p>应用程序每次轮询内核的 I/O 是否准备好，感觉有点傻乎乎，因为轮询的过程中，应用程序啥也做不了，只是在循环。</p>
 <p>为了解决这种傻乎乎轮询方式，于是 <strong>I/O 多路复用</strong>技术就出来了，如 select、poll，它是通过 I/O 事件分发，当内核数据准备好时，再以事件通知应用程序进行操作。</p>
 <p>这个做法大大改善了应用进程对 CPU 的利用率，在没有被通知的情况下，应用进程可以使用 CPU 做其他的事情。</p>
 <p>下图是使用 select I/O 多路复用过程。注意，<code>read</code> 获取数据的过程（数据从内核态拷贝到用户态的过程），也是一个<strong>同步的过程</strong>，需要等待：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551864438" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551864438"></p>
 <p>实际上，无论是阻塞 I/O、非阻塞 I/O，还是基于非阻塞 I/O 的多路复用<strong>都是同步调用。因为它们在 read 调用时，内核将数据从内核空间拷贝到应用程序空间，过程都是需要等待的，也就是说这个过程是同步的，如果内核实现的拷贝效率不高，read 调用就会在这个同步过程中等待比较长的时间。</strong></p>
 <p>而真正的<strong>异步 I/O</strong> 是「内核数据准备好」和「数据从内核态拷贝到用户态」这两个过程都不用等待。</p>
 <p>当我们发起 <code>aio_read</code> 之后，就立即返回，内核自动将数据从内核空间拷贝到应用程序空间，这个拷贝过程同样是异步的，内核自动完成的，和前面的同步操作不一样，应用程序并不需要主动发起拷贝动作。过程如下图：</p>
-<img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551836756" alt="图片" style="zoom:67%;" />
-
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551836756"></p>
 <p>下面这张图，总结了以上几种 I/O 模型：</p>
-<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551798434" alt="图片"></p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/640-16416551798434"></p>
 <p>在前面我们知道了，I/O 是分为两个过程的：</p>
 <ol>
 <li>数据准备的过程</li>
