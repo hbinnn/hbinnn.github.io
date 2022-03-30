@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介静态链接的工作过程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员的自我修养（四）">
+<meta property="og:url" content="http://hbinnn.github.io/2022/03/30/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%9B%9B%EF%BC%89/index.html">
+<meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="简介静态链接的工作过程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220328234605700.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220329000815892.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220329004307222.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313115119465.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313115128793.png">
+<meta property="article:published_time" content="2022-03-30T15:57:02.000Z">
+<meta property="article:modified_time" content="2022-03-30T15:57:52.283Z">
+<meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220328234605700.png">
+
+<link rel="canonical" href="http://hbinnn.github.io/2022/03/30/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%9B%9B%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序员的自我修养（四） | hbinnn's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-46K30KQ5B2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hbinnn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/03/30/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%9B%9B%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hbinnn">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hbinnn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序员的自我修养（四）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-30 23:57:02 / 修改时间：23:57:52" itemprop="dateCreated datePublished" datetime="2022-03-30T23:57:02+08:00">2022-03-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">编译原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+            <div class="post-description">简介静态链接的工作过程</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>对于链接器而言，链接的过程就是将多个输入目标文件加工后合并成一个输出文件。</p>
+<p>整个过程可以分为两个步骤：</p>
+<ul>
+<li>空间和地址分配；</li>
+<li>符号解析与重定位；</li>
+</ul>
+<h3 id="空间与地址分配"><a href="#空间与地址分配" class="headerlink" title="空间与地址分配"></a>空间与地址分配</h3><p>空间分配，是将具有相同性质的段合并在一起，是在输出的可执行文件中的空间。</p>
+<p>地址分配，是指在装载后的虚拟地址中的虚拟地址空间。在空间分配完成之后，各个段的起始地址已经确定，各个段内的符号通过相对于段起始地址的偏移来计算符号的地址。</p>
+<p>同时将输入目标文件的符号表中的所有符号定义和符号引用收集起来，放在一个全局符号表中。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220328234605700.png" alt="image-20220328234605700"></p>
+<p>举个实际的例子：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> objdump -h a.o</span></span><br><span class="line">节：</span><br><span class="line">Idx Name          Size      VMA               LMA               File off  Algn</span><br><span class="line">  0 .text         0000000f  0000000000000000  0000000000000000  00000040  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line">  1 .data         00000004  0000000000000000  0000000000000000  00000050  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line">  2 .bss          00000004  0000000000000000  0000000000000000  00000054  2**2</span><br><span class="line">                  ALLOC</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> objdump -h b.o</span></span><br><span class="line">节：</span><br><span class="line">Idx Name          Size      VMA               LMA               File off  Algn</span><br><span class="line">  0 .text         0000000f  0000000000000000  0000000000000000  00000040  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line">  1 .data         00000004  0000000000000000  0000000000000000  00000050  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line">  2 .bss          00000004  0000000000000000  0000000000000000  00000054  2**2</span><br><span class="line">                  ALLOC</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ld a.o b.o -e main -o ab</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> objdump -h ab</span></span><br><span class="line">节：</span><br><span class="line">Idx Name          Size      VMA               LMA               File off  Algn</span><br><span class="line">  1 .text         0000001e  0000000000401000  0000000000401000  00001000  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line">  3 .data         00000008  0000000000404000  0000000000404000  00003000  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line">  4 .bss          00000008  0000000000404008  0000000000404008  00003008  2**2</span><br><span class="line">                  ALLOC</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220329000815892.png" alt="image-20220329000815892"></p>
+<p>可以看出，链接后各个段的大小是链接前各个目标文件的总和。</p>
+<p>且在链接前目标文件中的 VMA 都是0，而在链接后各个段都分配到了相应的虚拟地址。</p>
+<h4 id="符号地址的确定"><a href="#符号地址的确定" class="headerlink" title="符号地址的确定"></a>符号地址的确定</h4><p>在链接完成后，各个段的虚拟地址都已分配，这时需要计算各个符号的虚拟地址。由于符号在各个段内的偏移是固定的，每个符号的地址可以通过 「 段起始虚拟地址 + 段内偏移 」的方式确定。</p>
+<h3 id="符号解析与重定位"><a href="#符号解析与重定位" class="headerlink" title="符号解析与重定位"></a>符号解析与重定位</h3><h4 id="重定位"><a href="#重定位" class="headerlink" title="重定位"></a>重定位</h4><p>在编译时，编译器会搁置那些不知道地址的符号，将其交给链接器来进行修正。</p>
+<p>完成地址空间分配之后，链接器就可以根据分配好的虚拟地址来修正这些需要重定位的指令。</p>
+<blockquote>
+<p>指令修正的方式：</p>
+</blockquote>
+<h4 id="重定位表"><a href="#重定位表" class="headerlink" title="重定位表"></a>重定位表</h4><p>通过重定位表链接器可以知道哪些指令需要被重定位，重定位表用于保存与重定位相关的信息。可以通过 objdump -r 来查看。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[hbinnn@hbinnn-virtual-machine build]$objdump -r a.o </span><br><span class="line"></span><br><span class="line">a.o：     文件格式 elf64-x86-64</span><br><span class="line"></span><br><span class="line">RELOCATION RECORDS FOR [.text]:</span><br><span class="line">OFFSET           TYPE              VALUE </span><br><span class="line">0000000000000034 R_X86_64_PC32     shared-0x0000000000000004</span><br><span class="line">000000000000003c R_X86_64_PLT32    swap-0x0000000000000004</span><br></pre></td></tr></table></figure>
+
+<h4 id="符号解析"><a href="#符号解析" class="headerlink" title="符号解析"></a>符号解析</h4><p>编译时搁置的符号地址，在链接时需要被确定。</p>
+<p>在重新分配好的文件空间中，链接器会在全局符号表中找到相应的符号进行重定位，如果找不到符号，则会报错。</p>
+<p>例如查看 a.o 的符号表：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -s a.o</span></span><br><span class="line"></span><br><span class="line">Symbol table &#x27;.symtab&#x27; contains 12 entries:</span><br><span class="line">   Num:    Value          Size Type    Bind   Vis      Ndx Name</span><br><span class="line">     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND </span><br><span class="line">     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS a.c</span><br><span class="line">     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 </span><br><span class="line">     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 </span><br><span class="line">     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 </span><br><span class="line">     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 </span><br><span class="line">     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 </span><br><span class="line">     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 </span><br><span class="line">     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 </span><br><span class="line">     9: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 a</span><br><span class="line">    10: 0000000000000000    24 FUNC    GLOBAL DEFAULT    1 fun1</span><br><span class="line">    11: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND b</span><br></pre></td></tr></table></figure>
+
+<p>变量 b 的类型是 undefined 的，因此在链接后需要在全局符号表中能够找到 b ，否则链接器就将报符号未定义的错误。</p>
+<h3 id="COMMON-块"><a href="#COMMON-块" class="headerlink" title="COMMON 块"></a>COMMON 块</h3><p>符号类型对于链接器而言是透明的。当多个同名符号出现不一样的类型时，编译器需要处理。</p>
+<p>主要有三种情况：</p>
+<ul>
+<li>两个及以上的强符号类型不一致；</li>
+<li>一个强符号与多个弱符号类型不一致；</li>
+<li>两个及以上的弱符号类型不一致；</li>
+</ul>
+<p>对于情况一，多个强符号定义本身即为非法，链接器会报符号多重定义。</p>
+<p>对于情况二，最终符号定义与强符号相同。</p>
+<p>对于情况三，采用了一种 COMMON 块的机制，所谓 COMMON 块机制，可以理解为当多个目标符号所需要的 COMMON 块空间大小不一致时，以最大的为准。当多个弱符号类型不一致时，以空间最大的类型为准。</p>
+<blockquote>
+<p>回头再来理解一下为什么未初始化的全局变量不会出现在目标文件的 bss 段中：</p>
+<p>对于未初始化的全局变量被视为弱符号，通过 readelf -s 可以看到符号类型为 SHN_COMMON。</p>
+<p>其本质是因为在编译时无法确定该弱符号的大小，导致其无法存放在 “.bss” 段中。</p>
+<p>可以通过 gcc 的编译选项 “-fno-common” 或 “__attribute__((nocommon))” 将未初始化的全局变量不以 COMMON 块的形式处理，此时这些变量相当于一个强符号。</p>
+</blockquote>
+<h3 id="静态库链接"><a href="#静态库链接" class="headerlink" title="静态库链接"></a>静态库链接</h3><p>在 Linux 常常可以看到一种 .a 文件，这种称为静态库文件。</p>
+<p>静态库可以简单地看做一组目标文件的集合，通过 “ar” 压缩程序将这些目标文件压缩在一起并进行编号和索引形成了静态库文件。</p>
+<p>可以通过 ar 命令查看静态库包含的目标文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">ar -t /usr/lib/x86_64-linux-gnu/libc.a | head -n 5</span></span><br><span class="line">init-first.o</span><br><span class="line">libc-start.o</span><br><span class="line">sysdep.o</span><br><span class="line">version.o</span><br><span class="line">check_fds.o</span><br></pre></td></tr></table></figure>
+
+<p>在链接静态库时，其实并不需要链接整个静态库，只要链接需要的目标文件即可。</p>
+<p>但目标文件可能还会依赖静态库中的其他文件，因此链接器会自动的寻找需要的目标文件并链接，而不会将整个静态库都链接上。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220329004307222.png" alt="image-20220329004307222"></p>
+<h3 id="链接过程控制"><a href="#链接过程控制" class="headerlink" title="链接过程控制"></a>链接过程控制</h3><p>对于我们日常使用的二进制文件通过链接器的默认链接规则进行链接一般是不会有什么问题。</p>
+<p>但是对于操作系统内核这种需要对二进制文件进行控制的，如段的存放顺序、各个段的虚拟地址等，需要通过一些方式来控制链接的过程。</p>
+<p>控制链接的几种方式：</p>
+<ul>
+<li>通过命令行给链接器指定参数；</li>
+<li>将链接指令放在目标文件中；</li>
+<li>通过链接控制脚本；</li>
+</ul>
+<h4 id="命令行控制"><a href="#命令行控制" class="headerlink" title="命令行控制"></a>命令行控制</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 示例代码</span><br><span class="line"><span class="keyword">char</span>* str = <span class="string">&quot;hello world!\n&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">exit</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="keyword">asm</span>(<span class="string">&quot;movl $42,%ebx \n\t&quot;</span></span><br><span class="line">            <span class="string">&quot;movl $1,%eax \n\t&quot;</span></span><br><span class="line">            <span class="string">&quot;int $0x80 \n\t&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">nomain</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="built_in">exit</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过命令行的方式来编译和链接：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -c -fno-builtin test.c</span><br><span class="line">ld -static -e nomain -o test test.o</span><br></pre></td></tr></table></figure>
+
+<p>–fno-builtin 关闭 GCC 内置函数。</p>
+<p>-static 使用静态链接的方式链接程序，-e 指定程序入口为 nomain。</p>
+<h4 id="ld-链接脚本"><a href="#ld-链接脚本" class="headerlink" title="ld 链接脚本"></a>ld 链接脚本</h4><p>链接脚本通常以 lds 作为扩展名。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 示例脚本</span><br><span class="line">ENTRY(nomain)</span><br><span class="line">    </span><br><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">    . = <span class="number">0x1234567</span> + SIZEOF_HEADERS;</span><br><span class="line">    testtext : &#123; *(.text) *(.data) *(.rodata) &#125;</span><br><span class="line">    /DISCARD/ : &#123; *(.eh_frame) *(.comment) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ENTRY 指定了程序入口为 nomain 函数。</p>
+<p>SECTIONS 是链接脚本的主题，指定了输入段到输出段的变换。</p>
+<p><code>. = 0x1234567 + SIZEOF_HEADERS;</code> 表示将当前虚拟地址设置为 0x1234567 + SIZEOF_HEADERS，SIZEOF_HEADERS 为输出文件的文件头大小，后面紧跟着 testtext 段的地址即为 0x1234567 + SIZEOF_HEADERS。</p>
+<p><code>testtext : &#123; *(.text) *(.data) *(.rodata)&#125;</code> 是个段转换规则，将所有输入文件中的段名为 “.text” “.data” “.rodata” 的段依次合并到 “testtext” 段中。</p>
+<p><code>/DISCARD/ : &#123; *(.eh_frame) *(.comment)&#125;</code> 表示将输入文件中段名为 “.eh_frame” “.common”的段丢弃，不保存到输出文件中。 </p>
+<p>通过 ld 命令 -T 参数指定脚本控制链接：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ld -static -T test.lds -o testlds test.o</span><br></pre></td></tr></table></figure>
+
+<p>查看生成文件的段表差异：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 命令行控制方式</span></span><br><span class="line"><span class="meta">$</span><span class="bash">objdump -h <span class="built_in">test</span></span></span><br><span class="line"></span><br><span class="line">test：     文件格式 elf64-x86-64</span><br><span class="line"></span><br><span class="line">节：</span><br><span class="line">Idx Name          Size      VMA               LMA               File off  Algn</span><br><span class="line">  0 .note.gnu.property 00000020  00000000004001c8  00000000004001c8  000001c8  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  1 .text         0000002c  0000000000401000  0000000000401000  00001000  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line">  2 .rodata       0000000e  0000000000402000  0000000000402000  00002000  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  3 .eh_frame     00000058  0000000000402010  0000000000402010  00002010  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  4 .data         00000008  0000000000404000  0000000000404000  00003000  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line">  5 .comment      00000029  0000000000000000  0000000000000000  00003008  2**0</span><br><span class="line">                  CONTENTS, READONLY</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 链接脚本控制</span></span><br><span class="line"><span class="meta">$</span><span class="bash">objdump -h testlds</span> </span><br><span class="line"></span><br><span class="line">testlds：     文件格式 elf64-x86-64</span><br><span class="line"></span><br><span class="line">节：</span><br><span class="line">Idx Name          Size      VMA               LMA               File off  Algn</span><br><span class="line">  0 .note.gnu.property 00000020  0000000001234688  0000000001234688  00000688  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  1 testtext      0000003a  00000000012346a8  00000000012346a8  000006a8  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, CODE</span><br><span class="line">  2 .data.rel.local 00000008  00000000012346e8  00000000012346e8  000006e8  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br></pre></td></tr></table></figure>
+
+<h4 id="链接脚本语法"><a href="#链接脚本语法" class="headerlink" title="链接脚本语法"></a>链接脚本语法</h4><p>链接脚本语句分两种：命令语句和赋值语句。ENTRY 就是命令语句，而 . = 0x1234567 + SIZEOF_HEADERS 就是赋值语句。语句间原则上按 “;” 作为分隔符，但命令语句也可以使用换行作为分隔符。</p>
+<p>常见命令语句：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313115119465.png" alt="image-20220313115119465"></p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313115128793.png" alt="image-20220313115128793"></p>
+<p>SECTIONS 命令语句基本格式：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    secname : &#123; contents &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>secname 表示输出段的段名，输出段名需要符合输出文件的格式要求。</p>
+<p>contents 输入段的书写规则：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">filename(sections)</span><br></pre></td></tr></table></figure>
+
+<p>filename 表示输入文件名，sections 表示输入段名。如：file1.o(data)、file1.o(.data .rodata)、file1.o、*(.data)、[a-z]*(.text*[a-z])。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/30/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B8%89%EF%BC%89/" rel="prev" title="程序员的自我修养（三）">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养（三）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A9%BA%E9%97%B4%E4%B8%8E%E5%9C%B0%E5%9D%80%E5%88%86%E9%85%8D"><span class="nav-number">1.</span> <span class="nav-text">空间与地址分配</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E5%9C%B0%E5%9D%80%E7%9A%84%E7%A1%AE%E5%AE%9A"><span class="nav-number">1.1.</span> <span class="nav-text">符号地址的确定</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E8%A7%A3%E6%9E%90%E4%B8%8E%E9%87%8D%E5%AE%9A%E4%BD%8D"><span class="nav-number">2.</span> <span class="nav-text">符号解析与重定位</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E4%BD%8D"><span class="nav-number">2.1.</span> <span class="nav-text">重定位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E4%BD%8D%E8%A1%A8"><span class="nav-number">2.2.</span> <span class="nav-text">重定位表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E8%A7%A3%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">符号解析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COMMON-%E5%9D%97"><span class="nav-number">3.</span> <span class="nav-text">COMMON 块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93%E9%93%BE%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">静态库链接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E8%BF%87%E7%A8%8B%E6%8E%A7%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">链接过程控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8E%A7%E5%88%B6"><span class="nav-number">5.1.</span> <span class="nav-text">命令行控制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ld-%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC"><span class="nav-number">5.2.</span> <span class="nav-text">ld 链接脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="nav-number">5.3.</span> <span class="nav-text">链接脚本语法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hbinnn"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hbinnn</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hbinnn" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hbinnn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lx1003129759@gmail.com" title="E-Mail → mailto:lx1003129759@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hbinnn</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">44k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
