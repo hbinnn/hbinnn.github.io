@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介动态链接的工作过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员的自我修养（六）">
+<meta property="og:url" content="http://hbinnn.github.io/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AD%EF%BC%89/index.html">
+<meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="简介动态链接的工作过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406225014762.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406224953830.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406230546205.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220409160034372.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313233032964.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220409174344065.png">
+<meta property="article:published_time" content="2022-04-10T09:16:25.000Z">
+<meta property="article:modified_time" content="2022-04-10T09:17:04.067Z">
+<meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406225014762.png">
+
+<link rel="canonical" href="http://hbinnn.github.io/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AD%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序员的自我修养（六） | hbinnn's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-46K30KQ5B2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hbinnn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AD%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hbinnn">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hbinnn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序员的自我修养（六）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-10 17:16:25 / 修改时间：17:17:04" itemprop="dateCreated datePublished" datetime="2022-04-10T17:16:25+08:00">2022-04-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">编译原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>18k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>33 分钟</span>
+            </span>
+            <div class="post-description">简介动态链接的工作过程。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="为什么需要动态链接"><a href="#为什么需要动态链接" class="headerlink" title="为什么需要动态链接"></a>为什么需要动态链接</h2><p>回想一下静态链接的过程，是将多个目标文件合并到一个输出文件中去，那么最终的输出文件的大小也应该在输入目标文件的大小总和附近。对于一些通用的公共库而言，这样一来必然造成空间上的浪费，试想每个程序都保留有 printf 等公共库函数。另外对于不利于程序的发布，每当有一个目标文件进行了更新，整个输出文件都需要进行重新编译才能正常工作。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406225014762.png" alt="image-20220406225014762"></p>
+<h2 id="动态链接的基本思想"><a href="#动态链接的基本思想" class="headerlink" title="动态链接的基本思想"></a>动态链接的基本思想</h2><p>动态链接的基本思想是将程序按模块拆分成各个相对独立的部分，程序运行时再将他们链接在一起形成一个完整的程序。</p>
+<p>通过在内存中共享一个目标文件，不仅可以节省内存，还可以减少物理页面的换入换出，也能够增加 CPU 缓存的命中率。</p>
+<p>程序的更新发布也变得更加容易，将需要更新的目标文件覆盖即可，无需重新编译程序。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406224953830.png" alt="image-20220406224953830"></p>
+<h2 id="动态链接的过程"><a href="#动态链接的过程" class="headerlink" title="动态链接的过程"></a>动态链接的过程</h2><p>举个例子，将 a.c 编译成 so，b.c 通过链接 so 使用 a.c 中的函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* a.c */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;hello\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* b.c */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    print();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -fPIC -shared a.c -o a.so</span><br><span class="line">gcc b.c ./a.so -o b</span><br></pre></td></tr></table></figure>
+
+<p>整个过程大概如下：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220406230546205.png" alt="image-20220406230546205"></p>
+<p>这里有一个问题：a.so 是运行时链接的，为什么在生成 b 可执行文件时还是用到了 a.so？</p>
+<p>试想一下，如果是静态链接，在生成可执行文件 b 之前，需要对 b.c 中的符号 print 进行重定位，如果找不到则报错。在动态链接的情况下，符号重定位的过程自然也就推迟到了运行时，链接器会将 print 符号标记为一个动态链接的符号。而 a.so 中包含了完整的符号信息，因此链接器需要用到 a.so 的原因正是因为需要通过其符号信息将 print 标记为动态符号。</p>
+<h2 id="动态链接运行时地址空间分布"><a href="#动态链接运行时地址空间分布" class="headerlink" title="动态链接运行时地址空间分布"></a>动态链接运行时地址空间分布</h2><p>对于静态链接的程序，在装载时只有可执行文件本身需要映射。而对于动态链接，除了可执行文件本身，还需要将其依赖的目标文件映射到内存中。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> cat /proc/5491/maps</span> </span><br><span class="line">5613ca90c000-5613ca90d000 r--p 00000000 08:05 2103550                    /home/hbinnn/workspace/test/6/b</span><br><span class="line">5613ca90d000-5613ca90e000 r-xp 00001000 08:05 2103550                    /home/hbinnn/workspace/test/6/b</span><br><span class="line">5613ca90e000-5613ca90f000 r--p 00002000 08:05 2103550                    /home/hbinnn/workspace/test/6/b</span><br><span class="line">5613ca90f000-5613ca910000 r--p 00002000 08:05 2103550                    /home/hbinnn/workspace/test/6/b</span><br><span class="line">5613ca910000-5613ca911000 rw-p 00003000 08:05 2103550                    /home/hbinnn/workspace/test/6/b</span><br><span class="line">5613cbbeb000-5613cbc0c000 rw-p 00000000 00:00 0                          [heap]</span><br><span class="line">7f2d3543f000-7f2d35442000 rw-p 00000000 00:00 0 </span><br><span class="line">7f2d35442000-7f2d35464000 r--p 00000000 08:05 2754860                    /usr/lib/x86_64-linux-gnu/libc-2.31.so</span><br><span class="line">7f2d35464000-7f2d355dc000 r-xp 00022000 08:05 2754860                    /usr/lib/x86_64-linux-gnu/libc-2.31.so</span><br><span class="line">7f2d355dc000-7f2d3562a000 r--p 0019a000 08:05 2754860                    /usr/lib/x86_64-linux-gnu/libc-2.31.so</span><br><span class="line">7f2d3562a000-7f2d3562e000 r--p 001e7000 08:05 2754860                    /usr/lib/x86_64-linux-gnu/libc-2.31.so</span><br><span class="line">7f2d3562e000-7f2d35630000 rw-p 001eb000 08:05 2754860                    /usr/lib/x86_64-linux-gnu/libc-2.31.so</span><br><span class="line">7f2d35630000-7f2d35634000 rw-p 00000000 00:00 0 </span><br><span class="line">7f2d35643000-7f2d35644000 r--p 00000000 08:05 2103549                    /home/hbinnn/workspace/test/6/a.so</span><br><span class="line">7f2d35644000-7f2d35645000 r-xp 00001000 08:05 2103549                    /home/hbinnn/workspace/test/6/a.so</span><br><span class="line">7f2d35645000-7f2d35646000 r--p 00002000 08:05 2103549                    /home/hbinnn/workspace/test/6/a.so</span><br><span class="line">7f2d35646000-7f2d35647000 r--p 00002000 08:05 2103549                    /home/hbinnn/workspace/test/6/a.so</span><br><span class="line">7f2d35647000-7f2d35648000 rw-p 00003000 08:05 2103549                    /home/hbinnn/workspace/test/6/a.so</span><br><span class="line">7f2d35648000-7f2d3564a000 rw-p 00000000 00:00 0 </span><br><span class="line">7f2d3564a000-7f2d3564b000 r--p 00000000 08:05 2754856                    /usr/lib/x86_64-linux-gnu/ld-2.31.so</span><br><span class="line">7f2d3564b000-7f2d3566e000 r-xp 00001000 08:05 2754856                    /usr/lib/x86_64-linux-gnu/ld-2.31.so</span><br><span class="line">7f2d3566e000-7f2d35676000 r--p 00024000 08:05 2754856                    /usr/lib/x86_64-linux-gnu/ld-2.31.so</span><br><span class="line">7f2d35677000-7f2d35678000 r--p 0002c000 08:05 2754856                    /usr/lib/x86_64-linux-gnu/ld-2.31.so</span><br><span class="line">7f2d35678000-7f2d35679000 rw-p 0002d000 08:05 2754856                    /usr/lib/x86_64-linux-gnu/ld-2.31.so</span><br><span class="line">7f2d35679000-7f2d3567a000 rw-p 00000000 00:00 0 </span><br><span class="line">7ffc75767000-7ffc75788000 rw-p 00000000 00:00 0                          [stack]</span><br><span class="line">7ffc7578f000-7ffc75793000 r--p 00000000 00:00 0                          [vvar]</span><br><span class="line">7ffc75793000-7ffc75795000 r-xp 00000000 00:00 0                          [vdso]</span><br><span class="line">ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]</span><br></pre></td></tr></table></figure>
+
+<p>将 b 程序运行，可以看到在虚拟地址空间中，除了 可执行文件 b 本身，还有依赖的 a.so，libc-2.31.so 是动态链接形式的C语言运行库，ld-2.31.so 是动态链接器，在程序开始运行前，操作系统会将控制权交给动态链接器，由它完成所有的动态链接动作后再讲控制权交给程序。</p>
+<p>通过 readelf 查看 a.so 的段信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -l a.so</span></span><br><span class="line"></span><br><span class="line">Elf 文件类型为 DYN (共享目标文件)</span><br><span class="line">Entry point 0x1060</span><br><span class="line">There are 11 program headers, starting at offset 64</span><br><span class="line"></span><br><span class="line">程序头：</span><br><span class="line">  Type           Offset             VirtAddr           PhysAddr</span><br><span class="line">                 FileSiz            MemSiz              Flags  Align</span><br><span class="line">  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">                 0x0000000000000528 0x0000000000000528  R      0x1000</span><br><span class="line">  LOAD           0x0000000000001000 0x0000000000001000 0x0000000000001000</span><br><span class="line">                 0x000000000000013d 0x000000000000013d  R E    0x1000</span><br><span class="line">  LOAD           0x0000000000002000 0x0000000000002000 0x0000000000002000</span><br><span class="line">                 0x00000000000000cc 0x00000000000000cc  R      0x1000</span><br><span class="line">  LOAD           0x0000000000002e10 0x0000000000003e10 0x0000000000003e10</span><br><span class="line">                 0x0000000000000218 0x0000000000000220  RW     0x1000</span><br><span class="line">  DYNAMIC        0x0000000000002e20 0x0000000000003e20 0x0000000000003e20</span><br><span class="line">                 0x00000000000001c0 0x00000000000001c0  RW     0x8</span><br><span class="line">  NOTE           0x00000000000002a8 0x00000000000002a8 0x00000000000002a8</span><br><span class="line">                 0x0000000000000020 0x0000000000000020  R      0x8</span><br><span class="line">  NOTE           0x00000000000002c8 0x00000000000002c8 0x00000000000002c8</span><br><span class="line">                 0x0000000000000024 0x0000000000000024  R      0x4</span><br><span class="line">  GNU_PROPERTY   0x00000000000002a8 0x00000000000002a8 0x00000000000002a8</span><br><span class="line">                 0x0000000000000020 0x0000000000000020  R      0x8</span><br><span class="line">  GNU_EH_FRAME   0x0000000000002008 0x0000000000002008 0x0000000000002008</span><br><span class="line">                 0x000000000000002c 0x000000000000002c  R      0x4</span><br><span class="line">  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">                 0x0000000000000000 0x0000000000000000  RW     0x10</span><br><span class="line">  GNU_RELRO      0x0000000000002e10 0x0000000000003e10 0x0000000000003e10</span><br><span class="line">                 0x00000000000001f0 0x00000000000001f0  R      0x1</span><br><span class="line"></span><br><span class="line"> Section to Segment mapping:</span><br><span class="line">  段节...</span><br><span class="line">   00     .note.gnu.property .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt </span><br><span class="line">   01     .init .plt .plt.got .plt.sec .text .fini </span><br><span class="line">   02     .rodata .eh_frame_hdr .eh_frame </span><br><span class="line">   03     .init_array .fini_array .dynamic .got .got.plt .data .bss </span><br><span class="line">   04     .dynamic </span><br><span class="line">   05     .note.gnu.property </span><br><span class="line">   06     .note.gnu.build-id </span><br><span class="line">   07     .note.gnu.property </span><br><span class="line">   08     .eh_frame_hdr </span><br><span class="line">   09     </span><br><span class="line">   10     .init_array .fini_array .dynamic .got </span><br></pre></td></tr></table></figure>
+
+<p>可以看出，动态链接模块的装载地址是从 0 开始的，而 0 是一个无效地址。可以推断出动态链接模块的最终装载地址在编译时是不确定的，而是在装载时分配的。</p>
+<h2 id="地址无关代码"><a href="#地址无关代码" class="headerlink" title="地址无关代码"></a>地址无关代码</h2><h3 id="装载时重定位"><a href="#装载时重定位" class="headerlink" title="装载时重定位"></a>装载时重定位</h3><p>程序在装载后需要对程序中的绝对地址的引用进行重定位。程序被装载的地址是根据当时内存的空闲情况而定的，其装载地址是不确定的，有可能被装载到任意位置。由于程序是作为整体被加载的，程序内的相对位置是不变的，因此程序中的所有绝对引用只需要加上一次加载时的偏移量即可。</p>
+<p>例如，程序假设被装载的目标地址是 0x1000， 但实际加载到虚拟空间的地址是 0x4000， 那么所有的绝对引用只要加上 0x3000 的偏移量即可。</p>
+<h3 id="动态链接模块装载的问题"><a href="#动态链接模块装载的问题" class="headerlink" title="动态链接模块装载的问题"></a>动态链接模块装载的问题</h3><p>动态链接库可以同时被多个进程使用，如果动态链接库的机器指令中存在绝对地址引用，在链接重定位修正的指令无法在多个进程间共享。</p>
+<p>动态链接模块的可修改数据部分对不同进程是有多个副本，可以采用装载时重定位的方式。</p>
+<h3 id="地址无关代码-1"><a href="#地址无关代码-1" class="headerlink" title="地址无关代码"></a>地址无关代码</h3><p>为了解决动态链接模块的指令部分在装载时不随着装载地址的改变而改变，可以通过将指令中那些需要被修改的部分分离出来，和数据放在一起，这样指令部分就可以保持不变。这样的方案就称为地址无关代码。</p>
+<p>按照地址引用是否跨模块可以分为模块内引用、模块间引用；按引用方式的不同可以分为指令引用、数据引用。因此整个地址无关代码可以分为四种情况来进行讨论：</p>
+<ul>
+<li><p>模块内部函数调用：</p>
+<p>模块内部调用是最简单一种类型，被调函数与调用者处于同一模块处，他们的相对位置是固定的。因此可以通过相对地址调用，或者是基于寄存器的相对调用，这种指令不需要进行重定位。</p>
+</li>
+<li><p>模块内部数据访问：</p>
+<p>由于指令不能包含绝对地址，那么访问数据的唯一方式就是相对寻址。模块内部数据之间的相对位置是固定的，可以通过当前指令加上偏移量的方式实现数据的访问。</p>
+<blockquote>
+<p>PC 指针的获取方式：</p>
+<p>call 指令会将下一条指令的地址压入栈，而调用 __i686.get_pc_thunk.cx 会将 esp 的值赋给 ecx，esp 中保存的就是下一条指令的地址，进而得到 PC 指针的值。再通过 ecx 加上偏移就得到了数据的地址。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">call __i686.get_pc_thunk.cx</span><br><span class="line">add xx, %ecx</span><br><span class="line"></span><br><span class="line">__i686.get_pc_thunk.cx:</span><br><span class="line">mov (%esp), %ecx</span><br><span class="line">ret</span><br></pre></td></tr></table></figure></blockquote>
+</li>
+<li><p>模块间数据访问：</p>
+<p>模块间的数据访问目标地址需要到装载时才能确定。ELF 的做法是在数据段中建立一个指向这些变量的指针数组，也称为全局偏移表(Global Offset Table, GOT)。当代码需要引用时，通过 GOT 间接引用。链接器在装载模块时会填充 GOT 中的各个项。</p>
+<p>以下图为例，当程序需要访问变量 b 时，先找到 GOT 表，通过 GOT 表查找 b 的目标地址。GOT 表中每个变量都对于一个 4 字节的地址（32位机器），链接器在装载时会根据每个变量装载的地址来填充 GOT 表中的数据。</p>
+<p>在访问 GOT 表时，与模块内的数据访问相类似，先找到 GOT 表与当前指令的相对偏移，通过 PC 值加上这个偏移就得到了 GOT 表的地址。</p>
+<p>通过 readelf 查看 GOT 表的位置以及需要重定位的项：</p>
+<p>稍微修改一下上面的 a.c 例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> b;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    b = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;hello\n&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -S a.so</span></span><br><span class="line">...</span><br><span class="line">[22] .got              PROGBITS         0000000000003fd8  00002fd8</span><br><span class="line">       0000000000000028  0000000000000008  WA       0     0     8</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -r a.so</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">000000003fe0  000300000006 R_X86_64_GLOB_DAT 0000000000000000 b + 0</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220409160034372.png" alt="image-20220409160034372"></p>
+</li>
+<li><p>模块间的函数调用：</p>
+<p>与模块间的变量访问相同，只是 GOT 表项中存放的函数的地址。</p>
+</li>
+</ul>
+<h3 id="如何产生地址无关的代码"><a href="#如何产生地址无关的代码" class="headerlink" title="如何产生地址无关的代码"></a>如何产生地址无关的代码</h3><p>GCC 提供了参数 “-fPIC” ，PIC 是 Position-independent Code 的缩写。</p>
+<blockquote>
+<p>GCC 还提供了参数 “-fpic” ，从功能上来说两者相同，区别在于 “-fpic” 产生的代码相对较小。但由于 </p>
+<p>“-fpic” 在不同的平台上可能会有限制，绝大部分情况下都不使用。</p>
+</blockquote>
+<p>可以通过判断是否在代码段重定位表来区分一个 DSO 是否是 PIC 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -d a.so | grep TEXTREL</span></span><br></pre></td></tr></table></figure>
+
+<p>如果有任何输出，那么 DSO 就不是 PIF 的，否则就是 PIC 的。</p>
+<h2 id="延迟绑定"><a href="#延迟绑定" class="headerlink" title="延迟绑定"></a>延迟绑定</h2><p>动态链接相较于静态链接具有较好的灵活性，但同时也伴随着性能的下降。主要是由于两点造成的：</p>
+<ul>
+<li>GOT 表带来的访问开销；</li>
+<li>动态链接的工作在运行时完成；</li>
+</ul>
+<p>需要通过一些方法对动态链接做一些性能上的优化。</p>
+<h3 id="延迟绑定实现"><a href="#延迟绑定实现" class="headerlink" title="延迟绑定实现"></a>延迟绑定实现</h3><p>程序模块间存在大量的函数引用，这对动态链接的耗费是比较大的。在程序运行的过程中，往往很多函数不会被调用或者很少调用，这个时候在程序运行时对其进行链接是一种浪费。因此 ELF 采用了一种延迟绑定（Lazy Binding）的做法，直到函数第一次调用时才进行绑定，如果没有用到则不进行绑定。</p>
+<p>ELF 使用 PLT（Procedure Linkage Table）的方法来实现延迟绑定。在访问外部函数时，并不直接通过 GOT 表进行跳转，而是通过一个叫做 PLT 项的结构来跳转，每个外部函数在 PLT 中都有一个相应的项。</p>
+<p>举个例子，加入要访问外部函数 bar()，其在 PLT 中的地址称为 bar@plt，bar@plt 的实现如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bar@plt:</span><br><span class="line">    jmp *(bar@GOT)</span><br><span class="line">    push n</span><br><span class="line">    push moduleID</span><br><span class="line">    jump _dl_runtime_resolve</span><br></pre></td></tr></table></figure>
+
+<p>如果 bar@GOT 中已经填充好，那么 第一条指令就直接跳转到 bar 的地址进行执行。</p>
+<p>但为了实现延迟绑定，bar@GOT 中并没有 bar 的地址，而是将第二条指令的地址填充到 bar@GOT 中，相当于跳过第一条指令执行第二条指令。</p>
+<p>接下来为 _dl_runtime_resolve 函数压入两个参数 moduleID、n，将模块的 ID 以及 bar 符号在重定位表中的下标 n 传入动态链接器的 _dl_runtime_resolve 函数来完成符号的解析和重定位工作。</p>
+<p>_dl_runtime_resolve 在完成之后将 bar 的地址填入到 bar@GOT 中。后续再调用 bar@plt 时，会直接通过第一条指令跳转到 bar 的地址进行执行，并根据 EIP 返回到调用者，而不会执行后续的指令。</p>
+<p>ELF 将 GOT 拆分成两个表：”.got” 和 “.got.plt”，前者保存全局变量引用的地址，后者保存函数引用的地址。对 “.got.plt” 而言，前三项是有特殊意义的，分别是：</p>
+<ul>
+<li>“.dynamic” 段的地址；</li>
+<li>本模块的 ID；</li>
+<li>_dl_runtime_resolve 函数的地址；</li>
+</ul>
+<p>其中 2、3项是由动态链接器在装载共享模块是初始化的。</p>
+<h2 id="动态链接相关结构"><a href="#动态链接相关结构" class="headerlink" title="动态链接相关结构"></a>动态链接相关结构</h2><p>在完成可执行文件的装载后，操作系统需要将控制权交给动态链接器，由其完成链接工作后再见控制权交给程序。</p>
+<p>在 Linux 下，动态链接器 ld.so 实际上也是一个共享对象，操作系统同样通过映射的方式将其加载到进程的地址空间中。</p>
+<h3 id="“-interp”段"><a href="#“-interp”段" class="headerlink" title="“.interp”段"></a>“.interp”段</h3><p>动态链接器的位置由 ELF 文件决定，存储在 “.interp” 段中。里面保存着一个字符串，指向可执行文件所需要的动态链接器的路径。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> objdump -s b</span></span><br><span class="line"></span><br><span class="line">Contents of section .interp:</span><br><span class="line"> 0318 2f6c6962 36342f6c 642d6c69 6e75782d  /lib64/ld-linux-</span><br><span class="line"> 0328 7838362d 36342e73 6f2e3200           x86-64.so.2.</span><br></pre></td></tr></table></figure>
+
+<h3 id="“-dynamic”段"><a href="#“-dynamic”段" class="headerlink" title="“.dynamic”段"></a>“.dynamic”段</h3><p>“.dynamic” 段保存了动态链接器所需要的基本信息，如依赖哪些共享对象，动态链接符号表的位置，动态链接重定位表的位置等。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -d b</span></span><br><span class="line"></span><br><span class="line">Dynamic section at offset 0x2db0 contains 28 entries:</span><br><span class="line">  Tag        Type                         Name/Value</span><br><span class="line"> 0x0000000000000001 (NEEDED)             Shared library：[./a.so]</span><br><span class="line"> 0x0000000000000001 (NEEDED)             Shared library：[libc.so.6]</span><br><span class="line"> 0x000000000000000c (INIT)               0x1000</span><br><span class="line"> 0x000000000000000d (FINI)               0x1218</span><br><span class="line"> 0x0000000000000019 (INIT_ARRAY)         0x3da0</span><br><span class="line"> 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)</span><br><span class="line"> 0x000000000000001a (FINI_ARRAY)         0x3da8</span><br><span class="line"> 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)</span><br><span class="line"> 0x000000006ffffef5 (GNU_HASH)           0x3a0</span><br><span class="line"> 0x0000000000000005 (STRTAB)             0x4a0</span><br><span class="line"> 0x0000000000000006 (SYMTAB)             0x3c8</span><br><span class="line"> 0x000000000000000a (STRSZ)              146 (bytes)</span><br><span class="line"> 0x000000000000000b (SYMENT)             24 (bytes)</span><br><span class="line"> 0x0000000000000015 (DEBUG)              0x0</span><br><span class="line"> 0x0000000000000003 (PLTGOT)             0x3fb0</span><br><span class="line"> 0x0000000000000002 (PLTRELSZ)           48 (bytes)</span><br><span class="line"> 0x0000000000000014 (PLTREL)             RELA</span><br><span class="line"> 0x0000000000000017 (JMPREL)             0x628</span><br><span class="line"> 0x0000000000000007 (RELA)               0x568</span><br><span class="line"> 0x0000000000000008 (RELASZ)             192 (bytes)</span><br><span class="line"> 0x0000000000000009 (RELAENT)            24 (bytes)</span><br><span class="line"> 0x000000000000001e (FLAGS)              BIND_NOW</span><br><span class="line"> 0x000000006ffffffb (FLAGS_1)            标志： NOW PIE</span><br><span class="line"> 0x000000006ffffffe (VERNEED)            0x548</span><br><span class="line"> 0x000000006fffffff (VERNEEDNUM)         1</span><br><span class="line"> 0x000000006ffffff0 (VERSYM)             0x532</span><br><span class="line"> 0x000000006ffffff9 (RELACOUNT)          3</span><br><span class="line"> 0x0000000000000000 (NULL)               0x0</span><br></pre></td></tr></table></figure>
+
+<p>Type:</p>
+<ul>
+<li>DT_SYMTABL：动态链接符号表地址；</li>
+<li>DT_STRTAB：动态链接字符串表地址；</li>
+<li>DT_STRSZ：动态链接字符串表大小；</li>
+<li>DT_HASH：动态链接哈希表地址；</li>
+<li>DT_SONAME：本共享对象的 SO-NAME；</li>
+<li>DT_RPATH：动态链接共享对象搜索地址；</li>
+<li>DT_INIT：初始化代码地址；</li>
+<li>DT_FINIT：结束代码地址；</li>
+<li>DT_NEED：依赖的共享对象文件；</li>
+<li>DT_REL、DT_RELA：动态链接重定位表地址；</li>
+</ul>
+<p>同样可以通过 ldd 命令查看程序依赖哪些共享库：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ldd b</span></span><br><span class="line">        linux-vdso.so.1 (0x00007ffc5996e000)</span><br><span class="line">        ./a.so (0x00007f1d97a3c000)</span><br><span class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f1d9783b000)</span><br><span class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007f1d97a48000)</span><br></pre></td></tr></table></figure>
+
+<h3 id="动态符号表"><a href="#动态符号表" class="headerlink" title="动态符号表"></a>动态符号表</h3><p>动态符号表 “.dynsym” 中保存了与动态链接相关的符号信息。还有一些辅助的表，如动态符号字符串表 “.dynstr” 保存符号名，符号哈希表 “.hash” 加快符号的查找过程。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -sD a.so</span></span><br><span class="line"></span><br><span class="line">Symbol table of `.gnu.hash&#x27; for image:</span><br><span class="line">  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name</span><br><span class="line">    7   0: 0000000000001119    36 FUNC    GLOBAL DEFAULT  14 print</span><br></pre></td></tr></table></figure>
+
+<h3 id="动态链接重定位表"><a href="#动态链接重定位表" class="headerlink" title="动态链接重定位表"></a>动态链接重定位表</h3><p>动态链接重定位表分别是 “.rel.dyn”、”.rel.plt”。”.rel.dyn” 是对数据引用的修正，”.rel.plt” 是对函数引用的修正。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -r a.so</span></span><br><span class="line"></span><br><span class="line">重定位节 &#x27;.rela.dyn&#x27; at offset 0x480 contains 8 entries:</span><br><span class="line">  偏移量          信息           类型           符号值        符号名称 + 加数</span><br><span class="line">000000003e08  000000000008 R_X86_64_RELATIVE                    1110</span><br><span class="line">000000003e10  000000000008 R_X86_64_RELATIVE                    10d0</span><br><span class="line">000000004020  000000000008 R_X86_64_RELATIVE                    4020</span><br><span class="line">000000003fd8  000100000006 R_X86_64_GLOB_DAT 0000000000000000 _ITM_deregisterTMClone + 0</span><br><span class="line">000000003fe0  000300000006 R_X86_64_GLOB_DAT 0000000000000000 b + 0</span><br><span class="line">000000003fe8  000400000006 R_X86_64_GLOB_DAT 0000000000000000 __gmon_start__ + 0</span><br><span class="line">000000003ff0  000500000006 R_X86_64_GLOB_DAT 0000000000000000 _ITM_registerTMCloneTa + 0</span><br><span class="line">000000003ff8  000600000006 R_X86_64_GLOB_DAT 0000000000000000 __cxa_finalize@GLIBC_2.2.5 + 0</span><br><span class="line"></span><br><span class="line">重定位节 &#x27;.rela.plt&#x27; at offset 0x540 contains 1 entry:</span><br><span class="line">  偏移量          信息           类型           符号值        符号名称 + 加数</span><br><span class="line">000000004018  000200000007 R_X86_64_JUMP_SLO 0000000000000000 puts@GLIBC_2.2.5 + 0</span><br></pre></td></tr></table></figure>
+
+<h3 id="动态链接下的进程堆栈初始化"><a href="#动态链接下的进程堆栈初始化" class="headerlink" title="动态链接下的进程堆栈初始化"></a>动态链接下的进程堆栈初始化</h3><p>在静态链接下进程堆栈的初始化如下所示：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313233032964.png" alt="image-20220313233032964"></p>
+<p>动态链接下，操作系统还需要告知动态链接器所需要的一些辅助信息，这些信息位于环境变量指针之后：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220409174344065.png" alt="image-20220409174344065"></p>
+<p>这些信息的格式定义在 elf.h 中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> a_type;</span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        <span class="keyword">uint32_t</span> a_val;</span><br><span class="line">    &#125; a_un;</span><br><span class="line">&#125; ELF32_auxv_t;</span><br></pre></td></tr></table></figure>
+
+<p>type:</p>
+<ul>
+<li>AT_NULL（0）：表示辅助信息结束；</li>
+<li>AT_EXEFD（2）：表示可执行文件的文件句柄；</li>
+<li>AT_PHDR（3）：可执行文件中的程序头表（Program Header）在进程中的地址；</li>
+<li>AT_PHENT（4）：可执行文件头中程序头表中每个入口（Entry）的大小；</li>
+<li>AT_PHNUM（5）：可执行文件头中程序头表中入口的数量；</li>
+<li>AT_BASE（7）：动态链接器本身的装载地址；</li>
+<li>AT_ENTRY（9）：可执行文件的入口地址；</li>
+</ul>
+<p>更多信息可以查看 <code>auxv.h</code>。</p>
+<p>可以通过程序将这些信息打印出来：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;elf.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">void</span> **p = (<span class="keyword">void</span> **)argv;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;argument count: %d\n&quot;</span>, argc);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; argc; ++i) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;argument %d: %s\n&quot;</span>, i, (<span class="keyword">char</span> *)*p);</span><br><span class="line">        p++;</span><br><span class="line">    &#125;</span><br><span class="line">    p++;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (*p) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;environment : %s\n&quot;</span>, (<span class="keyword">char</span> *)*p);</span><br><span class="line">        p++;</span><br><span class="line">    &#125;</span><br><span class="line">    p++;</span><br><span class="line"></span><br><span class="line">    Elf64_auxv_t *aux = (Elf64_auxv_t *)p;</span><br><span class="line">    <span class="keyword">while</span> (aux-&gt;a_type != AT_NULL) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;aux type: %d, value: %x\n&quot;</span>, aux-&gt;a_type, aux-&gt;a_un.a_val);</span><br><span class="line">        aux++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./<span class="built_in">test</span> 1234 123145 123</span></span><br><span class="line">argument count: 4</span><br><span class="line">argument 0: ./test</span><br><span class="line">argument 1: 1234</span><br><span class="line">argument 2: 123145</span><br><span class="line">argument 3: 123</span><br><span class="line">environment : SHELL=/bin/bash</span><br><span class="line">environment : COLORTERM=truecolor</span><br><span class="line">environment : TERM_PROGRAM_VERSION=1.66.0</span><br><span class="line">environment : LANGUAGE=zh_CN:zh</span><br><span class="line">environment : PWD=/home/hbinnn/workspace/test/7</span><br><span class="line">environment : LOGNAME=hbinnn</span><br><span class="line">environment : XDG_SESSION_TYPE=tty</span><br><span class="line">environment : VSCODE_GIT_ASKPASS_NODE=/home/hbinnn/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/node</span><br><span class="line">environment : MOTD_SHOWN=pam</span><br><span class="line">environment : HOME=/home/hbinnn</span><br><span class="line">environment : LANG=zh_CN.UTF-8</span><br><span class="line">environment : LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:</span><br><span class="line">environment : GIT_ASKPASS=/home/hbinnn/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/extensions/git/dist/askpass.sh</span><br><span class="line">environment : SSH_CONNECTION=192.168.138.1 4732 192.168.138.128 22</span><br><span class="line">environment : VSCODE_GIT_ASKPASS_EXTRA_ARGS=</span><br><span class="line">environment : LESSCLOSE=/usr/bin/lesspipe %s %s</span><br><span class="line">environment : XDG_SESSION_CLASS=user</span><br><span class="line">environment : TERM=xterm-256color</span><br><span class="line">environment : LESSOPEN=| /usr/bin/lesspipe %s</span><br><span class="line">environment : USER=hbinnn</span><br><span class="line">environment : VSCODE_GIT_IPC_HANDLE=/run/user/1000/vscode-git-62c4cdc635.sock</span><br><span class="line">environment : SHLVL=1</span><br><span class="line">environment : XDG_SESSION_ID=37</span><br><span class="line">environment : XDG_RUNTIME_DIR=/run/user/1000</span><br><span class="line">environment : PS1=\[\e]0;\u@\h: \w\a\]$&#123;debian_chroot:+($debian_chroot)&#125;\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ </span><br><span class="line">environment : SSH_CLIENT=192.168.138.1 4732 22</span><br><span class="line">environment : VSCODE_GIT_ASKPASS_MAIN=/home/hbinnn/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/extensions/git/dist/askpass-main.js</span><br><span class="line">environment : XDG_DATA_DIRS=/usr/local/share:/usr/share:/var/lib/snapd/desktop</span><br><span class="line">environment : BROWSER=/home/hbinnn/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/bin/helpers/browser.sh</span><br><span class="line">environment : PATH=/home/hbinnn/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</span><br><span class="line">environment : DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</span><br><span class="line">environment : TERM_PROGRAM=vscode</span><br><span class="line">environment : VSCODE_IPC_HOOK_CLI=/run/user/1000/vscode-ipc-6575c9d3-5e8f-48c5-9011-078a572e07b3.sock</span><br><span class="line">environment : _=./test</span><br><span class="line">environment : OLDPWD=/home/hbinnn/workspace/test</span><br><span class="line">aux type: 33, value: c70bd000</span><br><span class="line">aux type: 16, value: f8bfbff</span><br><span class="line">aux type: 6, value: 1000</span><br><span class="line">aux type: 17, value: 64</span><br><span class="line">aux type: 3, value: eec48040</span><br><span class="line">aux type: 4, value: 38</span><br><span class="line">aux type: 5, value: d</span><br><span class="line">aux type: 7, value: abcf9000</span><br><span class="line">aux type: 8, value: 0</span><br><span class="line">aux type: 9, value: eec49060</span><br><span class="line">aux type: 11, value: 3e8</span><br><span class="line">aux type: 12, value: 3e8</span><br><span class="line">aux type: 13, value: 3e8</span><br><span class="line">aux type: 14, value: 3e8</span><br><span class="line">aux type: 23, value: 0</span><br><span class="line">aux type: 25, value: c7012299</span><br><span class="line">aux type: 26, value: 2</span><br><span class="line">aux type: 31, value: c7013ff1</span><br><span class="line">aux type: 15, value: c70122a9</span><br></pre></td></tr></table></figure>
+
+<h2 id="动态链接的步骤和实现"><a href="#动态链接的步骤和实现" class="headerlink" title="动态链接的步骤和实现"></a>动态链接的步骤和实现</h2><p>动态链接的步骤基本上分为 3 步：启动动态链接器本身、装载所有需要的共享对象、重定位和初始化。</p>
+<h3 id="动态链接器自举"><a href="#动态链接器自举" class="headerlink" title="动态链接器自举"></a>动态链接器自举</h3><p>动态链接器本身有些特殊性，它不能依赖于任何其他共享对象；其次动态链接器本身所需要的全局和静态变量的重定位工作由它本身完成，意味着在动态链接器启动的过程中需要有一段代码完成重定位的工作又不能用到全局和静态变量。这种具有一定限制条件的启动代码被称为自举。</p>
+<p>动态链接器的入口地址即为自举代码的入口。自举代码首先会找到 GOT ，GOT 中第一项保存的是 “.dynamic” 的地址，通过 “.dynamic” 中的信息获取重定位表、符号表等，进而得到重定位入口，并进行重定位工作。</p>
+<h3 id="装载共享对象"><a href="#装载共享对象" class="headerlink" title="装载共享对象"></a>装载共享对象</h3><p>完成自举后，动态链接器将可执行文件和链接器本身的符号表都合并到一个全局符号表中，然后开始寻找可执行文件所依赖的共享对象，将其映射到进程空间中，并将符号表合并到全局符号表中，直到所有的依赖对象都完成装载。</p>
+<p>在装载的过程中可能会出现这样一个问题：有多个共享对象定义了一个同名符号，并且他们都被装载进来，在引用时会使用哪个符号？举个例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* a1.c */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;a1.c\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* a2.c */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;a2.c\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* b1.c */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">b1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    a();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* b2.c */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">b2</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    a();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* main.c */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">b1</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">b2</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    b1();</span><br><span class="line">    b2();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared a1.c -o a1.so</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared a2.c -o a2.so</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared b1.c a1.so -o b1.so</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared b2.c a2.so -o b2.so</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc main.c b1.so b2.so -o main -Xlinker -rpath ./</span></span><br></pre></td></tr></table></figure>
+
+<p>运行后的结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./main</span> </span><br><span class="line">a1.c</span><br><span class="line">a1.c</span><br></pre></td></tr></table></figure>
+
+<p>这种共享对象中的全局符号被另一个共享对象的同名全局符号覆盖的现象被称为共享对象全局符号介入。</p>
+<p>Linux 下的动态链接器是这样处理的：当一个符号需要被加入到全局符号表中时，如果相同的符号名已经存在，则后加入的符号被忽略。</p>
+<h3 id="重定位和初始化"><a href="#重定位和初始化" class="headerlink" title="重定位和初始化"></a>重定位和初始化</h3><p>装载完成后，动态链接器拥有进程的全局符号表，可以开始遍历可执行文件和共享对象的重定位表，对 GOT/PLT 表项进行修正。</p>
+<p>完成重定位后，如果共享对象有 “.init” 段，动态链接器会执行 “.init” 中的代码，完成共享对象特有的初始化过程。相应的，如果有 “.finit” 段，则进程退出时会执行 “.finit” 中的代码。</p>
+<h2 id="显式运行时链接"><a href="#显式运行时链接" class="headerlink" title="显式运行时链接"></a>显式运行时链接</h2><p>显式运行时链接，就是由进程自己控制在运行时加载指定的模块，并且可以在不需要的时候将其卸载。这种共享对象被称为动态装载库，通过由动态链接器提供的 API 来进行装载。具体来说主要是以下 4 个 API：dlopen、dlsym、dlerror、dlclose。</p>
+<h3 id="dlopen"><a href="#dlopen" class="headerlink" title="dlopen"></a>dlopen</h3><p>dlopen 用来打开一个动态库，并将其加载到进程的地址空间中，其原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">dlopen</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *filename, <span class="keyword">int</span> flag)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>filename 时动态库的路径，如果是绝对路径，则会尝试直接打开该动态库；如果是相对路径，会通过一定的顺序去查找：</p>
+<ul>
+<li>查找环境变量 LD_LIBRARY_PATH 指定的一系列目录；</li>
+<li>查找 /etc/ld.so.cache 里面所指定的共享库路径；</li>
+<li>/lib、/usr/lib；</li>
+</ul>
+<p>flag 指明了函数符号的解析方式，以下两个参数之一是必须指定的：</p>
+<ul>
+<li>RTLD_LAZY：延迟绑定；</li>
+<li>RTLD_NOW：模块加载时即绑定；</li>
+</ul>
+<p>dlopen 返回被加载模块的句柄。如果加载失败返回 NULL，如果多次加载则返回同一个句柄。</p>
+<p>如果加载模块有依赖关系，比如 A 依赖 B，那么需要先加载 B，再加载 A。</p>
+<p>同样 dlopen 也会在加载模块时执行 “.init” 中的代码。</p>
+<h3 id="dlsym"><a href="#dlsym" class="headerlink" title="dlsym"></a>dlsym</h3><p>函数原型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">dlsym</span><span class="params">(<span class="keyword">void</span> *handle, <span class="keyword">char</span> *symbol)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>第一个参数时 dlopen 返回的句柄，第二个参数是所要查找符号的名字。</p>
+<p>如果 dlsym 没找到所需要的符号，返回 NULL；如果查找到的符号是一个函数，那么返回函数的地址；如果查找的是一个变量，则返回变量的地址。</p>
+<h3 id="dlerror"><a href="#dlerror" class="headerlink" title="dlerror"></a>dlerror</h3><p>函数原型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">char</span> *<span class="title">dlerror</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>如果 dlerror 返回 NULL，则表示上次函数调用成功，否则 dlerror 返回相应的错误信息。</p>
+<h3 id="dlclose"><a href="#dlclose" class="headerlink" title="dlclose"></a>dlclose</h3><p>函数原型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">dlclose</span><span class="params">(<span class="keyword">void</span> *handle)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>dlclose 将一个模块进行卸载。dlopen、dlclose 使用引用计数的方式维持一个模块被使用的关系。只有当技术值为 0 时，模块才被真正的卸载。</p>
+<p>dlclose 同样会执行 “.finit” 中的代码，然后将模块的符号从全局符号表中去除。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%BA%94%EF%BC%89/" rel="prev" title="程序员的自我修养（五）">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养（五）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5"><span class="nav-number">1.</span> <span class="nav-text">为什么需要动态链接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3"><span class="nav-number">2.</span> <span class="nav-text">动态链接的基本思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">动态链接的过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E8%BF%90%E8%A1%8C%E6%97%B6%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E5%88%86%E5%B8%83"><span class="nav-number">4.</span> <span class="nav-text">动态链接运行时地址空间分布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E6%97%A0%E5%85%B3%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">地址无关代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85%E8%BD%BD%E6%97%B6%E9%87%8D%E5%AE%9A%E4%BD%8D"><span class="nav-number">5.1.</span> <span class="nav-text">装载时重定位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E6%A8%A1%E5%9D%97%E8%A3%85%E8%BD%BD%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">5.2.</span> <span class="nav-text">动态链接模块装载的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E6%97%A0%E5%85%B3%E4%BB%A3%E7%A0%81-1"><span class="nav-number">5.3.</span> <span class="nav-text">地址无关代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BA%A7%E7%94%9F%E5%9C%B0%E5%9D%80%E6%97%A0%E5%85%B3%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-number">5.4.</span> <span class="nav-text">如何产生地址无关的代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%B6%E8%BF%9F%E7%BB%91%E5%AE%9A"><span class="nav-number">6.</span> <span class="nav-text">延迟绑定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%B6%E8%BF%9F%E7%BB%91%E5%AE%9A%E5%AE%9E%E7%8E%B0"><span class="nav-number">6.1.</span> <span class="nav-text">延迟绑定实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E7%9B%B8%E5%85%B3%E7%BB%93%E6%9E%84"><span class="nav-number">7.</span> <span class="nav-text">动态链接相关结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9C-interp%E2%80%9D%E6%AE%B5"><span class="nav-number">7.1.</span> <span class="nav-text">“.interp”段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9C-dynamic%E2%80%9D%E6%AE%B5"><span class="nav-number">7.2.</span> <span class="nav-text">“.dynamic”段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">7.3.</span> <span class="nav-text">动态符号表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E9%87%8D%E5%AE%9A%E4%BD%8D%E8%A1%A8"><span class="nav-number">7.4.</span> <span class="nav-text">动态链接重定位表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8B%E7%9A%84%E8%BF%9B%E7%A8%8B%E5%A0%86%E6%A0%88%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">7.5.</span> <span class="nav-text">动态链接下的进程堆栈初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E7%9A%84%E6%AD%A5%E9%AA%A4%E5%92%8C%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.</span> <span class="nav-text">动态链接的步骤和实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%99%A8%E8%87%AA%E4%B8%BE"><span class="nav-number">8.1.</span> <span class="nav-text">动态链接器自举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85%E8%BD%BD%E5%85%B1%E4%BA%AB%E5%AF%B9%E8%B1%A1"><span class="nav-number">8.2.</span> <span class="nav-text">装载共享对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">8.3.</span> <span class="nav-text">重定位和初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E5%BC%8F%E8%BF%90%E8%A1%8C%E6%97%B6%E9%93%BE%E6%8E%A5"><span class="nav-number">9.</span> <span class="nav-text">显式运行时链接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dlopen"><span class="nav-number">9.1.</span> <span class="nav-text">dlopen</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dlsym"><span class="nav-number">9.2.</span> <span class="nav-text">dlsym</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dlerror"><span class="nav-number">9.3.</span> <span class="nav-text">dlerror</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dlclose"><span class="nav-number">9.4.</span> <span class="nav-text">dlclose</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hbinnn"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hbinnn</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hbinnn" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hbinnn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lx1003129759@gmail.com" title="E-Mail → mailto:lx1003129759@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hbinnn</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">67k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:02</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

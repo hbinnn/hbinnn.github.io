@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介可执行文件的装载过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员的自我修养（五）">
+<meta property="og:url" content="http://hbinnn.github.io/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%BA%94%EF%BC%89/index.html">
+<meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="简介可执行文件的装载过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404160724659.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404161719727.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404172254520.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404174435813.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404174619234.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313233032964.png">
+<meta property="article:published_time" content="2022-04-10T09:14:57.000Z">
+<meta property="article:modified_time" content="2022-04-10T09:15:46.018Z">
+<meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404160724659.png">
+
+<link rel="canonical" href="http://hbinnn.github.io/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%BA%94%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序员的自我修养（五） | hbinnn's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-46K30KQ5B2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hbinnn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%BA%94%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hbinnn">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hbinnn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序员的自我修养（五）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-10 17:14:57 / 修改时间：17:15:46" itemprop="dateCreated datePublished" datetime="2022-04-10T17:14:57+08:00">2022-04-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">编译原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+            <div class="post-description">简介可执行文件的装载过程。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>目标文件在经过链接后生成的可执行文件存放在磁盘中，需要将其加载到内存中才能被 CPU 执行。</p>
+<p>程序只有在加载到内存运行起来后才能称为进程。</p>
+<h2 id="进程虚拟地址空间"><a href="#进程虚拟地址空间" class="headerlink" title="进程虚拟地址空间"></a>进程虚拟地址空间</h2><p>每个程序运行起来后都有自己独立的虚拟地址空间，这个虚拟地址空间的大小由 CPU 的位数决定。</p>
+<p>以 32 位的 CPU 为例，其虚拟地址空间的大小为 4GB，操作系统为其做了分配，操作系统占用 0xC0000000 ~ 0xFFFFFFFF 共 1GB 的空间，余下 3GB 都是进程使用。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404160724659.png" alt="image-20220404160724659"></p>
+<h2 id="装载的方式"><a href="#装载的方式" class="headerlink" title="装载的方式"></a>装载的方式</h2><p>最简单的装载方式就是将程序全部加载到内存中，这样程序便可以顺利的运行。但是很多情况下程序所需要的内存大于物理内存，无法做到全部加载。</p>
+<p>根据程序的局部性原理，可以将程序最常用的部分加载到内存中，而不常用的部分放在磁盘中，直到需要时再加载到内存中。</p>
+<p>装载的方式最典型的有两种：覆盖装入和页映射。如今的装载方式大多数都是页映射的方式。</p>
+<h3 id="页映射"><a href="#页映射" class="headerlink" title="页映射"></a>页映射</h3><p>页映射将内存和磁盘中的程序按照 页 为单位划分，所有装载和操作的单位就是页。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404161719727.png" alt="image-20220404161719727"></p>
+<p>将可执行文件的 P0、P2、P4、P5 分别加载到物理内存的 F0、F1、F2、F3位置，如果程序此时需要访问 P3 的数据，那么需要替换内存中已经存在的页。换页的方式有很多，比如 FIFO、LRU 等，换页算法不在当前的讨论中。</p>
+<h2 id="从操作系统的视角看可执行文件的装载过程"><a href="#从操作系统的视角看可执行文件的装载过程" class="headerlink" title="从操作系统的视角看可执行文件的装载过程"></a>从操作系统的视角看可执行文件的装载过程</h2><p>装载可执行文件并运行可以视为创建了一个进程，进程的创建可以分作三个步骤：</p>
+<ul>
+<li>创建一个独立的虚拟地址空间；</li>
+<li>读取可执行文件头，建立虚拟地址空间与可执行文件的映射关系；</li>
+<li>将 CPU 的指令寄存器设置为可执行文件的入口地址，开始运行；</li>
+</ul>
+<p>创建虚拟地址空间，其实是通过操作系统的机制形成一个虚拟地址到物理地址的映射结构，当访问某一虚拟地址时，可以通过该数据结构找到实际的物理地址。</p>
+<p>紧接着需要形成一个虚拟地址与可执行文件的映射结构，当程序访问到某一个还未被加载到内存中的页时，会产生一个缺页异常，此时操作系统需要根据该结构找到程序所需的页在文件中的哪个位置。</p>
+<blockquote>
+<p>这种映射结构通过 <code>struct vm_area_struct</code> 来描述，其维护着一个 VMA（virtual memory area）链表。</p>
+<p>缺页换入的过程：</p>
+<p>1、程序执行到某个地址时发现该虚拟页是个空页面，产生缺页异常，控制权交给操作系统；</p>
+<p>2、 操作系统查询 vm_area_struct，找到空页面所在的 VMA；</p>
+<p>3、计算空页面在可执行文件中的偏移；</p>
+<p>4、分配物理页，建立该虚拟页与物理页的映射关系；</p>
+<p>5、控制权交还给进程，从缺页的位置重新开始执行；</p>
+</blockquote>
+<p>最后将 CPU 的指令寄存器设置为可执行文件的入口，操作系统便将控制权交给进程，进程开始执行。</p>
+<h2 id="进程虚拟地址空间分布"><a href="#进程虚拟地址空间分布" class="headerlink" title="进程虚拟地址空间分布"></a>进程虚拟地址空间分布</h2><h3 id="ELF-文件链接视图和执行视图"><a href="#ELF-文件链接视图和执行视图" class="headerlink" title="ELF 文件链接视图和执行视图"></a>ELF 文件链接视图和执行视图</h3><p>文件映射时是以系统页大小为单位进行映射的，而文件中每个段的长度并不一定是页大小的整数倍，当段的数量增多时，也造成了内存空间的浪费。</p>
+<p>从操作系统的视角来看，其并不关系各个段中的内容，更主要的是段的权限（读、写、执行）。ELF 文件中，段权限的组合基本上只有三种：</p>
+<ul>
+<li>以代码段为代表的可读可执行的段；</li>
+<li>以数据段和 BSS 段为代表的可读可写的段；</li>
+<li>以只读数据段为代表的只读的段；</li>
+</ul>
+<p>因此一种可解决的方案是：按段的权限来进行映射，相同权限的段合并在一起进行映射。</p>
+<p>举个例子，有两个段分别为 “.text” 和 “.init”，其大小分别是 4097 字节和 512 字节。如果各个段分别进行映射，则需要 3 个页面才能完成映射；如果采用合并后映射，则只需要 2 个页面。</p>
+<p>ELF 由此引入了一个概念叫做 “Segment”，一个 “Segment” 包含一个或多个相同属性的段，”Segment” 从装载的角度重新划分了 ELF 的各个段。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404172254520.png" alt="image-20220404172254520"></p>
+<p>可以通过 readelf -l 命令查看 ELF 文件的 “Segment”:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> readelf -l hello.o</span></span><br><span class="line"></span><br><span class="line">Elf 文件类型为 EXEC (可执行文件)</span><br><span class="line">Entry point 0x401c10</span><br><span class="line">There are 10 program headers, starting at offset 64</span><br><span class="line"></span><br><span class="line">程序头：</span><br><span class="line">  Type           Offset             VirtAddr           PhysAddr</span><br><span class="line">                 FileSiz            MemSiz              Flags  Align</span><br><span class="line">  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000</span><br><span class="line">                 0x0000000000000518 0x0000000000000518  R      0x1000</span><br><span class="line">  LOAD           0x0000000000001000 0x0000000000401000 0x0000000000401000</span><br><span class="line">                 0x000000000009390d 0x000000000009390d  R E    0x1000</span><br><span class="line">  LOAD           0x0000000000095000 0x0000000000495000 0x0000000000495000</span><br><span class="line">                 0x00000000000266b8 0x00000000000266b8  R      0x1000</span><br><span class="line">  LOAD           0x00000000000bc0c0 0x00000000004bd0c0 0x00000000004bd0c0</span><br><span class="line">                 0x0000000000005170 0x00000000000068c0  RW     0x1000</span><br><span class="line">  NOTE           0x0000000000000270 0x0000000000400270 0x0000000000400270</span><br><span class="line">                 0x0000000000000020 0x0000000000000020  R      0x8</span><br><span class="line">  NOTE           0x0000000000000290 0x0000000000400290 0x0000000000400290</span><br><span class="line">                 0x0000000000000044 0x0000000000000044  R      0x4</span><br><span class="line">  TLS            0x00000000000bc0c0 0x00000000004bd0c0 0x00000000004bd0c0</span><br><span class="line">                 0x0000000000000020 0x0000000000000060  R      0x8</span><br><span class="line">  GNU_PROPERTY   0x0000000000000270 0x0000000000400270 0x0000000000400270</span><br><span class="line">                 0x0000000000000020 0x0000000000000020  R      0x8</span><br><span class="line">  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">                 0x0000000000000000 0x0000000000000000  RW     0x10</span><br><span class="line">  GNU_RELRO      0x00000000000bc0c0 0x00000000004bd0c0 0x00000000004bd0c0</span><br><span class="line">                 0x0000000000002f40 0x0000000000002f40  R      0x1</span><br><span class="line"></span><br><span class="line"> Section to Segment mapping:</span><br><span class="line">  段节...</span><br><span class="line">   00     .note.gnu.property .note.gnu.build-id .note.ABI-tag .rela.plt </span><br><span class="line">   01     .init .plt .text __libc_freeres_fn .fini </span><br><span class="line">   02     .rodata .stapsdt.base .eh_frame .gcc_except_table </span><br><span class="line">   03     .tdata .init_array .fini_array .data.rel.ro .got .got.plt .data __libc_subfreeres __libc_IO_vtables __libc_atexit .bss __libc_freeres_ptrs </span><br><span class="line">   04     .note.gnu.property </span><br><span class="line">   05     .note.gnu.build-id .note.ABI-tag </span><br><span class="line">   06     .tdata .tbss </span><br><span class="line">   07     .note.gnu.property </span><br><span class="line">   08     </span><br><span class="line">   09     .tdata .init_array .fini_array .data.rel.ro .got </span><br></pre></td></tr></table></figure>
+
+<h3 id="堆和栈"><a href="#堆和栈" class="headerlink" title="堆和栈"></a>堆和栈</h3><p>VMA 结构除了用来映射可执行文件外，同样用于管理进程的地址空间。对于进程的堆栈空间，也是以 VMA 的形式存在于进程的虚拟地址空间中。</p>
+<p>可以通过 /proc 查看进程的虚拟空间分布：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> cat /proc/7420/maps</span> </span><br><span class="line">00400000-00401000 r--p 00000000 08:05 2229642                            /home/hbinnn/workspace/test/5/hello.o</span><br><span class="line">00401000-00495000 r-xp 00001000 08:05 2229642                            /home/hbinnn/workspace/test/5/hello.o</span><br><span class="line">00495000-004bc000 r--p 00095000 08:05 2229642                            /home/hbinnn/workspace/test/5/hello.o</span><br><span class="line">004bd000-004c0000 r--p 000bc000 08:05 2229642                            /home/hbinnn/workspace/test/5/hello.o</span><br><span class="line">004c0000-004c3000 rw-p 000bf000 08:05 2229642                            /home/hbinnn/workspace/test/5/hello.o</span><br><span class="line">004c3000-004c4000 rw-p 00000000 00:00 0 </span><br><span class="line">01b3e000-01b61000 rw-p 00000000 00:00 0                                  [heap]</span><br><span class="line">7ffc81812000-7ffc81833000 rw-p 00000000 00:00 0                          [stack]</span><br><span class="line">7ffc818f6000-7ffc818fa000 r--p 00000000 00:00 0                          [vvar]</span><br><span class="line">7ffc818fa000-7ffc818fc000 r-xp 00000000 00:00 0                          [vdso]</span><br><span class="line">ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>cat /proc/id/maps 输出格式：</p>
+<p>第一列是 VMA 的地址范围；第二列是 VMA 的权限，r-可读、w-可写、x-可执行、p-私有、s-共享；第三列是偏移，表示 VMA 对应的 segment 在映像文件中的偏移；第四列是映像文件所在设备的主设备号和次设备号；第五列是 inode number；第六列是映像文件的路径。</p>
+</blockquote>
+<h3 id="段地址对齐"><a href="#段地址对齐" class="headerlink" title="段地址对齐"></a>段地址对齐</h3><p>将 ELF 文件以 “Segment” 的方式进行映射，同样还是会出现一个 “Segment” 的长度不是页大小的整数倍的关系而导致的地址空间浪费。</p>
+<p>操作系统通过一种取巧的方式，将各个段接壤的部分共享一个物理页，然后将该物理页进行两次映射与虚拟地址进行关联。</p>
+<p>同样有两个 Segment 的大小分别为 4097 和 512 字节，分别映射时需要 3 个页。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404174435813.png" alt="image-20220404174435813"></p>
+<p>若让 Segment 接壤的部分共享一个物理页，则只需要两个页。</p>
+<p>简单理解就是将所有  Segment 汇总后以 page_size 为单位进行映射。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220404174619234.png" alt="image-20220404174619234"></p>
+<h3 id="进程栈初始化"><a href="#进程栈初始化" class="headerlink" title="进程栈初始化"></a>进程栈初始化</h3><p>假设有两个环境变量：HOME=/home/usr、PATH=/usr/bin，执行程序 prog 123，假设堆栈底部地址为 0xBF802000，则进程初始化后的堆栈如下：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220313233032964.png" alt="image-20220313233032964"></p>
+<p>最开始的 4 个字节表示命令行参数的数量，即 “proc”、”123”；接着是指向命令行参数的指针，然后是一个 0 表示命令行参数的结束；接着是指向环境变量的指针，同样跟着一个 0 表示结束。</p>
+<p>进程启动以后，运行库会将初始化信息中的参数传递给 main 函数，即 main 的两个参数：argc 和 argv。</p>
+<h2 id="Linux-内核装载-ELF"><a href="#Linux-内核装载-ELF" class="headerlink" title="Linux 内核装载 ELF"></a>Linux 内核装载 ELF</h2><p>假设在 bash 下执行一个 ELF 文件，过程如下：</p>
+<ul>
+<li>bash 调用 fork 创建一个新进程，新进程调用 execve 调用指定的 ELF 文件；</li>
+<li>execve 系统调用进入 sys_execve -&gt; do_execve，读取文件的前 128 个字节，判断 ELF 文件格式；</li>
+<li>调用 search_binary_handle 查找该类型的可执行文件装载处理回调函数，假设是 load_elf_binary，load_elf_binary 的执行过程：<ul>
+<li>检查 ELF 文件格式的有效性；</li>
+<li>寻找动态链接的 “.interp” 段，设置动态链接器路径；</li>
+<li>根据 ELF 程序头表描述，对 ELF 文件进行映射；</li>
+<li>初始化 ELF 进程环境；</li>
+<li>将系统调用返回地址修改为 ELF 可执行文件的入口；对于静态链接的 ELF 文件，就是 e_entry 所指向的地址；对于动态链接的 ELF 文件，则是动态链接器；</li>
+</ul>
+</li>
+<li>系统调用返回时，从内核态返回用户态，EIP 寄存器跳转到 ELF 入口，开始执行新程序。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/30/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%9B%9B%EF%BC%89/" rel="prev" title="程序员的自我修养（四）">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养（四）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AD%EF%BC%89/" rel="next" title="程序员的自我修养（六）">
+      程序员的自我修养（六） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="nav-number">1.</span> <span class="nav-text">进程虚拟地址空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A3%85%E8%BD%BD%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">装载的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E6%98%A0%E5%B0%84"><span class="nav-number">2.1.</span> <span class="nav-text">页映射</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%86%E8%A7%92%E7%9C%8B%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E7%9A%84%E8%A3%85%E8%BD%BD%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">从操作系统的视角看可执行文件的装载过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E5%88%86%E5%B8%83"><span class="nav-number">4.</span> <span class="nav-text">进程虚拟地址空间分布</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ELF-%E6%96%87%E4%BB%B6%E9%93%BE%E6%8E%A5%E8%A7%86%E5%9B%BE%E5%92%8C%E6%89%A7%E8%A1%8C%E8%A7%86%E5%9B%BE"><span class="nav-number">4.1.</span> <span class="nav-text">ELF 文件链接视图和执行视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E5%92%8C%E6%A0%88"><span class="nav-number">4.2.</span> <span class="nav-text">堆和栈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%9C%B0%E5%9D%80%E5%AF%B9%E9%BD%90"><span class="nav-number">4.3.</span> <span class="nav-text">段地址对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E6%A0%88%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.4.</span> <span class="nav-text">进程栈初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-%E5%86%85%E6%A0%B8%E8%A3%85%E8%BD%BD-ELF"><span class="nav-number">5.</span> <span class="nav-text">Linux 内核装载 ELF</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hbinnn"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hbinnn</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hbinnn" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hbinnn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lx1003129759@gmail.com" title="E-Mail → mailto:lx1003129759@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hbinnn</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">67k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:02</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
