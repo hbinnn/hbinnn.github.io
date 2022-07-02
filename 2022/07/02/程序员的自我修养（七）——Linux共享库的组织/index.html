@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介Linux下共享库的组织形式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员的自我修养（七）——Linux共享库的组织">
+<meta property="og:url" content="http://hbinnn.github.io/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94Linux%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E7%BB%84%E7%BB%87/index.html">
+<meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="简介Linux下共享库的组织形式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-02T10:04:26.000Z">
+<meta property="article:modified_time" content="2022-07-02T10:05:44.056Z">
+<meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://hbinnn.github.io/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94Linux%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E7%BB%84%E7%BB%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序员的自我修养（七）——Linux共享库的组织 | hbinnn's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-46K30KQ5B2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hbinnn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94Linux%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E7%BB%84%E7%BB%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hbinnn">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hbinnn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序员的自我修养（七）——Linux共享库的组织
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-07-02 18:04:26 / 修改时间：18:05:44" itemprop="dateCreated datePublished" datetime="2022-07-02T18:04:26+08:00">2022-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">编译原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+            <div class="post-description">简介Linux下共享库的组织形式。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>由于动态链接的优势，大量的程序开始使用动态链接机制，导致系统中共享对象的数量激增。这就需要有某种机制来管理这些共享对象，为长期的维护升级提供便利。</p>
+<p>从文件结构上来说，共享库与共享对象没什么区别，由于共享对象可以在各个程序之间共享，久而久之也就成为了以库形式存在。</p>
+<h2 id="共享库版本"><a href="#共享库版本" class="headerlink" title="共享库版本"></a>共享库版本</h2><h3 id="共享库兼容性"><a href="#共享库兼容性" class="headerlink" title="共享库兼容性"></a>共享库兼容性</h3><p>共享库在开发的过程中会不断的迭代升级、修复原有的 Bug 等，也就需要发布新的共享库来替换原先的共享库。最简单的情况下，共享库的升级可以分为两种：</p>
+<ul>
+<li>兼容升级：原始接口保持不变，在原有的基础上新增一些内容；</li>
+<li>不兼容升级：改变了原有的接口；</li>
+</ul>
+<p>如果出现不兼容升级，程序在使用原有的接口情况下，可能出现程序无法运行或运行结果不正确。</p>
+<h3 id="共享库版本命名"><a href="#共享库版本命名" class="headerlink" title="共享库版本命名"></a>共享库版本命名</h3><p>为了解决共享库兼容性问题，Linux 提供了一套规则来管理共享库的版本。Linux 规定共享库的文件名规则必须如：</p>
+<p><code>libname.so.x.y.z</code> </p>
+<p>name 是库的名字，x 表示主版本号，y 表示次版本号，z 表示发布版本号。</p>
+<p>主版本号表示库的重大升级，不同主版本号的库之间是不兼容的。</p>
+<p>次版本号表示库的增量升级，在保持原符号不变的基础上新增一些接口。主版本号相同的情况下，高的次版本号向后兼容低的次版本号的库。</p>
+<p>发布版本号表示库的一些错误的修正、性能改进等。不添加、改变任何接口。相同主、次版本号，不同发布版本号之间的库完全兼容。</p>
+<h3 id="SO-NAME"><a href="#SO-NAME" class="headerlink" title="SO-NAME"></a>SO-NAME</h3><p>在动态链接中提到，”.dynamic” 段保存了程序所依赖的共享对象的名字。结合共享库命名的规则来看，如果程序直接使用共享库的名字来链接会出现什么样的情况。</p>
+<p>假设程序 A 依赖库文件 libc.so.1.1.1，编译完成后，A 的 “.dynamic” 段中就会保留 libc.so.1.1.1 的名称。这时将 libc 升级到 libc.so.1.2.1，程序 A 就无法正常执行了，会出现 libc.so.1.1.1 不存在的情况，但其实 libc.so.1.2.1 是完全能够兼容 libc.so.1.1.1 的。</p>
+<p>为了解决这种情况，Linux 采用了一种 SO-NAME 的机制来记录共享库的依赖关系。每个共享库都有一个对应的 SO-NAME，SO-NAME 即共享库的文件名去掉次版本号和发布版本号，保留主版本号。如 libc.so.1.2.1 的 SO-NAME 为 libc.so.1，会建立一个 libc.so.1 的软链接指向 libc.so.1.2.1。</p>
+<p>这样所有程序在编译、链接和运行时，都是用 SO-NAME，不再关注详细的版本号。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> ll /usr/lib/x86_64-linux-gnu/libsqlite3.so.0</span></span><br><span class="line">lrwxrwxrwx 1 root root 19 1月  11 22:25 /usr/lib/x86_64-linux-gnu/libsqlite3.so.0 -&gt; libsqlite3.so.0.8.6</span><br></pre></td></tr></table></figure>
+
+<p>Linux 提供了工具 ldconfig，当安装或更新一个共享库时，就会运行这个工具，它会更新所有的软链接使其指向最新版本的共享库。</p>
+<h2 id="符号版本"><a href="#符号版本" class="headerlink" title="符号版本"></a>符号版本</h2><p>SO-NAME 解决了共享库升级后的链接问题，但是考虑这样一个场景：</p>
+<p>程序 A 依赖 libc.so.1.2.1 中的一个符号，这个符号是 libc.so.1.2.1 升级新增的，系统上目前是 libc.so.1.1.1 版本，并没有这个符号，而动态链接器在链接时仅判断了主版本号，认为被依赖的共享库的 SO-NAME 与系统中的一致。这样就导致了 A 由于符号缺失而运行失败。这种问题称为此版本交会问题。</p>
+<p>实际操作一下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* main.c */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> g_a_1_1_1;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> g_a_1_2_1;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, g_a_1_1_1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, g_a_1_2_1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* a_1_1_1.c */</span></span><br><span class="line"><span class="keyword">int</span> g_a_1_1_1 = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* a_1_2_1.c */</span></span><br><span class="line"><span class="keyword">int</span> g_a_1_1_1 = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">int</span> g_a_1_2_1 = <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 首先生成两个共享库并更新SO-NAME</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared -Wl,-soname=liba.so a_1_1_1.c -o liba.so.1.1.1</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared -Wl,-soname=liba.so a_1_2_1.c -o liba.so.1.2.1</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行 ldconfig 生成 SO-NAME</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ldconfig -n ./</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ll</span></span><br><span class="line">总用量 52</span><br><span class="line">drwxrwxr-x  2 hbinnn hbinnn  4096 4月  17 11:46 ./</span><br><span class="line">drwxrwxr-x 12 hbinnn hbinnn  4096 4月  17 11:14 ../</span><br><span class="line">-rw-rw-r--  1 hbinnn hbinnn    18 4月  17 11:15 a_1_1_1.c</span><br><span class="line">-rw-rw-r--  1 hbinnn hbinnn    37 4月  17 11:16 a_1_2_1.c</span><br><span class="line">lrwxrwxrwx  1 hbinnn hbinnn    13 4月  17 11:46 liba.so -&gt; liba.so.1.2.1*</span><br><span class="line">-rwxrwxr-x  1 hbinnn hbinnn 15504 4月  17 11:45 liba.so.1.1.1*</span><br><span class="line">-rwxrwxr-x  1 hbinnn hbinnn 15544 4月  17 11:45 liba.so.1.2.1*</span><br><span class="line">-rw-rw-r--  1 hbinnn hbinnn    87 4月  17 11:39 main.c</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> main.c 依赖 liba.so.1.2.1 编译</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc main.c ./liba.so.1.2.1 -o main</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除 liba.so.1.2.1 并从重新运行 ldconfig 构造此版本交会的场景</span></span><br><span class="line"> ll</span><br><span class="line">总用量 56</span><br><span class="line">drwxrwxr-x  2 hbinnn hbinnn  4096 4月  17 11:47 ./</span><br><span class="line">drwxrwxr-x 12 hbinnn hbinnn  4096 4月  17 11:14 ../</span><br><span class="line">-rw-rw-r--  1 hbinnn hbinnn    18 4月  17 11:15 a_1_1_1.c</span><br><span class="line">-rw-rw-r--  1 hbinnn hbinnn    37 4月  17 11:16 a_1_2_1.c</span><br><span class="line">lrwxrwxrwx  1 hbinnn hbinnn    13 4月  17 11:47 liba.so -&gt; liba.so.1.1.1*</span><br><span class="line">-rwxrwxr-x  1 hbinnn hbinnn 15504 4月  17 11:45 liba.so.1.1.1*</span><br><span class="line">-rwxrwxr-x  1 hbinnn hbinnn 16728 4月  17 11:46 main*</span><br><span class="line">-rw-rw-r--  1 hbinnn hbinnn    87 4月  17 11:39 main.c</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行 main 出现错误</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ./main</span> </span><br><span class="line">./main: symbol lookup error: ./main: undefined symbol: g_a_1_2_1</span><br></pre></td></tr></table></figure>
+
+<h3 id="基于符号的版本机制"><a href="#基于符号的版本机制" class="headerlink" title="基于符号的版本机制"></a>基于符号的版本机制</h3><p>这个机制的基本思路就是让每个导出和导入的符号都有一个关联的版本号，简单说就是对每个符号都打上版本的标签。例如 libc.so.1.2.1 中的符号 test 可能就会被修饰为 test_vers_1.2。在动态链接重定位时就能够根据符号版本来发现这种此版本交会问题。</p>
+<p>例如 GLIBC 的符号版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> nm main</span></span><br><span class="line">                 U b1</span><br><span class="line">                 U b2</span><br><span class="line">0000000000004010 B __bss_start</span><br><span class="line">0000000000004010 b completed.8061</span><br><span class="line">                 w __cxa_finalize@@GLIBC_2.2.5</span><br><span class="line">                 U __libc_start_main@@GLIBC_2.2.5</span><br></pre></td></tr></table></figure>
+
+<h3 id="制定符号版本"><a href="#制定符号版本" class="headerlink" title="制定符号版本"></a>制定符号版本</h3><h4 id="通过符号版本脚本制定："><a href="#通过符号版本脚本制定：" class="headerlink" title="通过符号版本脚本制定："></a>通过符号版本脚本制定：</h4><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* a.ver */</span></span><br><span class="line">VERS_1.1.1 &#123;</span><br><span class="line">    <span class="keyword">global</span>:</span><br><span class="line">        g_a_1_1_1;</span><br><span class="line">    <span class="keyword">local</span>:</span><br><span class="line"><span class="comment">        *;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">VERS_1.2.1 &#123;</span><br><span class="line">    <span class="keyword">global</span>:</span><br><span class="line">        g_a_1_2_1;</span><br><span class="line">    <span class="keyword">local</span>:</span><br><span class="line"><span class="comment">        *;</span></span><br><span class="line">&#125; VERS_1.1.1;</span><br></pre></td></tr></table></figure>
+
+<p>在第一个集合中，指定了符号版本号名为 VERS_1.1.1 ，有一个全局符号为 g_a_1_1_1。</p>
+<p>第二个集合中，指定了符号版本号名为 VERS_1.2.1 ，新增了一个全局符号为 g_a_1_2_1，同时继承了第一个集合的全部符号。</p>
+<p>global 中指定了全局符号，local 中指定了局部符号，这些局部符号外部无法访问。</p>
+<p>修改一下上面的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* main */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> g_a_1_1_1;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> g_a_1_2_1;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> g_b_1_2_1;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, g_a_1_1_1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, g_a_1_2_1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, g_b_1_2_1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* a_1_2_1.c */</span></span><br><span class="line"><span class="keyword">int</span> g_a_1_1_1 = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">int</span> g_a_1_2_1 = <span class="number">2</span>;</span><br><span class="line"><span class="keyword">int</span> g_b_1_2_1 = <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>编译时指定符号脚本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> gcc -fPIC -shared -Wl,-soname=liba.so.1 a_1_2_1.c -Xlinker --version-script a.ver -o liba.so.1.2.1</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> gcc main.c ./liba.so.1.2.1 -o main</span></span><br><span class="line">/usr/bin/ld: /tmp/ccPmZpN6.o: in function `main&#x27;:</span><br><span class="line">main.c:(.text+0x3c): undefined reference to `g_b_1_2_1&#x27;</span><br><span class="line">collect2: error: ld returned 1 exit status</span><br></pre></td></tr></table></figure>
+
+<p>main 在链接时无法找到 g_b_1_2_1，虽然 g_b_1_2_1 被定义为全局变量，但是由于在符号脚本中指定了其为局部变量导致外部无法访问。</p>
+<p>修改后查看 main 中的符号：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> nm main</span></span><br><span class="line">0000000000004010 B g_a_1_1_1@@VERS_1.1.1</span><br><span class="line">000000000000401c B g_a_1_2_1@@VERS_1.2.1</span><br><span class="line">0000000000004018 B g_b_1_2_1@@VERS_1.2.1</span><br></pre></td></tr></table></figure>
+
+<p>可以看到符号都被打上了版本的标签。</p>
+<h4 id="通过汇编制定："><a href="#通过汇编制定：" class="headerlink" title="通过汇编制定："></a>通过汇编制定：</h4><p>gcc 提供 “.symver” 的汇编宏来指定符号的版本。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">asm</span>(<span class="string">&quot;.symver g_a_1_1_1, g_a_1_1_1@VERS_1.1.1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> g_a_1_1_1 = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>我在将上述代码编译成 so 的时候一直报错，还未解决，将其编译成二进制则没有问题：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> gcc  -fPIC -shared -Wl,-soname=liba.so.1 a_1_1_1.c  -o liba.so.1.1.1</span></span><br><span class="line">/usr/bin/ld: liba.so.1.1.1: version node not found for symbol g_a_1_1_1@VERS_1.1.1</span><br><span class="line">/usr/bin/ld: failed to set dynamic section sizes: bad value</span><br><span class="line">collect2: error: ld returned 1 exit status</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>另外 gcc 也允许多个版本的同一符号存在于一个共享库中，在链接层面提供了符号重载的机制。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">asm</span>(<span class="string">&quot;.symver old_print, print@VERS_1.1.1&quot;</span>);</span><br><span class="line"><span class="keyword">asm</span>(<span class="string">&quot;.symver new_print, print@VERS_1.2.1&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">old_print</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">new_print</span><span class="params">()</span> </span>&#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="共享库系统路径"><a href="#共享库系统路径" class="headerlink" title="共享库系统路径"></a>共享库系统路径</h2><p>共享库主要存在于以下几个位置：</p>
+<ul>
+<li>/lib，主要存放 /bin 和 /sbin 下的程序所需要的库，还有系统启动时需要的库；</li>
+<li>/usr/lib，主要存放非系统运行时所需要的关键性的共享库；</li>
+<li>/usr/local/lib，主要存放一些第三方的共享库；</li>
+</ul>
+<h2 id="共享库查找过程"><a href="#共享库查找过程" class="headerlink" title="共享库查找过程"></a>共享库查找过程</h2><p>动态链接器在查找模块时的规则如下：</p>
+<ul>
+<li>如果 “.dynamic” 段中存放的是绝对路径，则直接到相应的路径下查找；</li>
+<li>如果是相对路径，则会在 /lib、/usr/lib 和 /etc/ld.so.conf 中指定的目录下查找；</li>
+</ul>
+<p>动态链接器在查找时，如果每次都去遍历，会非常耗时。因此 ldconfig 在更新 SO-NAME 的同时，会生成一个 SO-NAME 的缓存，保存在 /etc/ld.so.cache 中，用来加速动态链接器的查找。</p>
+<p>还可以通过环境变量 LD_LIBRARY_PATH 来临时修改共享库的查找路径。</p>
+<p>总结下动态链接的搜索规则如下：</p>
+<ul>
+<li>搜索 LD_LIBRARY_PATH 指定的路径；</li>
+<li>缓存文件 /etc/ld.so.cache 指定的路径；</li>
+<li>默认共享库目录，先 /usr/lib，/lib；</li>
+</ul>
+<h3 id="其他环境变量"><a href="#其他环境变量" class="headerlink" title="其他环境变量"></a>其他环境变量</h3><h4 id="LD-PRELOAD"><a href="#LD-PRELOAD" class="headerlink" title="LD_PRELOAD"></a>LD_PRELOAD</h4><p>环境变量 LD_PRELOAD 可以用来指定预先装载一些共享库或者目标文件，这些库会在动态链接器搜索固定规则前加载。它比 LD_LIBRARY_PATH 的优先级还要高。可以利用 LD_PRELOAD 环境变量以及全局符号介入机制，来覆盖一些标准库中的函数进行调试。</p>
+<h4 id="LD-DEBUG"><a href="#LD-DEBUG" class="headerlink" title="LD_DEBUG"></a>LD_DEBUG</h4><p>这个变量可以打开动态链接器的调试功能，动态链接器在运行时会打印出有用的信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> LD_DEBUG=files ./main</span></span><br><span class="line">     10508:</span><br><span class="line">     10508:     file=liba.so.1 [0];  needed by ./main [0]</span><br><span class="line">     10508:     file=liba.so.1 [0];  generating link map</span><br><span class="line">     10508:       dynamic: 0x00007f8135824e50  base: 0x00007f8135821000   size: 0x0000000000004030</span><br><span class="line">     10508:         entry: 0x00007f8135822040  phdr: 0x00007f8135821040  phnum:                 10</span><br><span class="line">     10508:</span><br><span class="line">     10508:</span><br><span class="line">     10508:     file=libc.so.6 [0];  needed by ./main [0]</span><br><span class="line">     10508:     file=libc.so.6 [0];  generating link map</span><br><span class="line">     10508:       dynamic: 0x00007f813581ab80  base: 0x00007f813562f000   size: 0x00000000001f1660</span><br><span class="line">     10508:         entry: 0x00007f81356531f0  phdr: 0x00007f813562f040  phnum:                 14</span><br><span class="line">     10508:</span><br><span class="line">     10508:</span><br><span class="line">     10508:     calling init: /lib/x86_64-linux-gnu/libc.so.6</span><br><span class="line">     10508:</span><br><span class="line">     10508:</span><br><span class="line">     10508:     calling init: /home/hbinnn/workspace/test/9/liba.so.1</span><br><span class="line">     10508:</span><br><span class="line">     10508:</span><br><span class="line">     10508:     initialize program: ./main</span><br><span class="line">     10508:</span><br><span class="line">     10508:</span><br><span class="line">     10508:     transferring control: ./main</span><br><span class="line">     10508:</span><br><span class="line">5</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">     10508:</span><br><span class="line">     10508:     calling fini: ./main [0]</span><br><span class="line">     10508:</span><br><span class="line">     10508:</span><br><span class="line">     10508:     calling fini: /home/hbinnn/workspace/test/9/liba.so.1 [0]</span><br><span class="line">     10508:</span><br></pre></td></tr></table></figure>
+
+<p>LD_DEBUG 可用的值有：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> LD_DEBUG=<span class="built_in">help</span> ls</span></span><br><span class="line">Valid options for the LD_DEBUG environment variable are:</span><br><span class="line"></span><br><span class="line">  libs        display library search paths</span><br><span class="line">  reloc       display relocation processing</span><br><span class="line">  files       display progress for input file</span><br><span class="line">  symbols     display symbol table processing</span><br><span class="line">  bindings    display information about symbol binding</span><br><span class="line">  versions    display version dependencies</span><br><span class="line">  scopes      display scope information</span><br><span class="line">  all         all previous options combined</span><br><span class="line">  statistics  display relocation statistics</span><br><span class="line">  unused      determined unused DSOs</span><br><span class="line">  help        display this help message and exit</span><br><span class="line"></span><br><span class="line">To direct the debugging output into a file instead of standard output</span><br><span class="line">a filename can be specified using the LD_DEBUG_OUTPUT environment variable.</span><br></pre></td></tr></table></figure>
+
+<h2 id="共享库的安装和创建"><a href="#共享库的安装和创建" class="headerlink" title="共享库的安装和创建"></a>共享库的安装和创建</h2><h3 id="共享库的创建"><a href="#共享库的创建" class="headerlink" title="共享库的创建"></a>共享库的创建</h3><p>gcc 创建共享库的命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -fPIC -shared -Wl,-soname=soname -o library_name source_file</span><br></pre></td></tr></table></figure>
+
+<p>可以通过 -rpath(或 -Wl，-rpath=) 指定共享库的查找路径。</p>
+<p>还可以通过 gcc 参数 “-L” 和 “-l” 分别指定共享库的搜索目录和共享库路径。</p>
+<h3 id="清除符号信息"><a href="#清除符号信息" class="headerlink" title="清除符号信息"></a>清除符号信息</h3><p>可以通过 工具 strip 清除所有的符号和调试信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strip xxx</span><br></pre></td></tr></table></figure>
+
+<p>可以使用 ld 的 “-s” 或 “-S” 参数在链接产生输出文件时就不生产符号信息。两者的区别在于前者清除所有符号信息，后者清除调试符号信息。</p>
+<p>还可以在 gcc 通过 “-Wl,-s”，”-Wl,-S” 来传递这两个参数。</p>
+<h3 id="共享库的安装"><a href="#共享库的安装" class="headerlink" title="共享库的安装"></a>共享库的安装</h3><p>通过 ldconfig 建立 SO-NAME，可以通过 -n 参数指定 共享库所在的目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ldconfig -n shared_library_directory</span><br></pre></td></tr></table></figure>
+
+<h3 id="共享库的构造和析构函数"><a href="#共享库的构造和析构函数" class="headerlink" title="共享库的构造和析构函数"></a>共享库的构造和析构函数</h3><p>如果希望共享库在被装载时能够进行一些初始化工作，在卸载时能够进行一些析构工作，可以通过 “__attribute__((constructor))” 、”__attribute__((destructor))” 来指定构造和析构函数。</p>
+<p>如果有多个构造或析构函数，可以指定函数的优先级让这个函数按照优先级来执行。</p>
+<p>“__attribute__((constructor(5)))”、”__attribute__((destructor(10)))” 。对构造函数而言，数字越小优先级越高越先执行，析构函数正好相反，数字越小优先级越低越后执行。</p>
+<h3 id="共享库脚本"><a href="#共享库脚本" class="headerlink" title="共享库脚本"></a>共享库脚本</h3><p>共享库目前都是 ELF 文件，其实还可以链接脚本文件。通过这种脚本文件将多个共享库组合在一起。</p>
+<p>以上面的函数为例， liba.so 的内容可以是：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GROUP</span>(<span class="regexp">/home/</span>hbinnn<span class="regexp">/workspace/</span>test<span class="regexp">/9/</span>liba.so.<span class="number">1.1</span>.<span class="number">1</span> <span class="regexp">/home/</span>hbinnn<span class="regexp">/workspace/</span>test<span class="regexp">/9/</span>liba.so.<span class="number">1.2</span>.<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c ./liba.so -o main</span><br></pre></td></tr></table></figure>
+
+<p>main 同样可以正常的链接。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/10/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AD%EF%BC%89%E2%80%94%E2%80%94%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" rel="prev" title="程序员的自我修养（六）——动态链接">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养（六）——动态链接
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AB%EF%BC%89%E2%80%94%E2%80%94%E7%A8%8B%E5%BA%8F%E4%B8%8E%E5%86%85%E5%AD%98/" rel="next" title="程序员的自我修养（八）——程序与内存">
+      程序员的自我修养（八）——程序与内存 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%89%88%E6%9C%AC"><span class="nav-number">1.</span> <span class="nav-text">共享库版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E5%85%BC%E5%AE%B9%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">共享库兼容性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%89%88%E6%9C%AC%E5%91%BD%E5%90%8D"><span class="nav-number">1.2.</span> <span class="nav-text">共享库版本命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO-NAME"><span class="nav-number">1.3.</span> <span class="nav-text">SO-NAME</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E7%89%88%E6%9C%AC"><span class="nav-number">2.</span> <span class="nav-text">符号版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%AC%A6%E5%8F%B7%E7%9A%84%E7%89%88%E6%9C%AC%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.</span> <span class="nav-text">基于符号的版本机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%B6%E5%AE%9A%E7%AC%A6%E5%8F%B7%E7%89%88%E6%9C%AC"><span class="nav-number">2.2.</span> <span class="nav-text">制定符号版本</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E7%AC%A6%E5%8F%B7%E7%89%88%E6%9C%AC%E8%84%9A%E6%9C%AC%E5%88%B6%E5%AE%9A%EF%BC%9A"><span class="nav-number">2.2.1.</span> <span class="nav-text">通过符号版本脚本制定：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E6%B1%87%E7%BC%96%E5%88%B6%E5%AE%9A%EF%BC%9A"><span class="nav-number">2.2.2.</span> <span class="nav-text">通过汇编制定：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%B7%AF%E5%BE%84"><span class="nav-number">3.</span> <span class="nav-text">共享库系统路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E6%9F%A5%E6%89%BE%E8%BF%87%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">共享库查找过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">4.1.</span> <span class="nav-text">其他环境变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LD-PRELOAD"><span class="nav-number">4.1.1.</span> <span class="nav-text">LD_PRELOAD</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LD-DEBUG"><span class="nav-number">4.1.2.</span> <span class="nav-text">LD_DEBUG</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%88%9B%E5%BB%BA"><span class="nav-number">5.</span> <span class="nav-text">共享库的安装和创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">5.1.</span> <span class="nav-text">共享库的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E9%99%A4%E7%AC%A6%E5%8F%B7%E4%BF%A1%E6%81%AF"><span class="nav-number">5.2.</span> <span class="nav-text">清除符号信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85"><span class="nav-number">5.3.</span> <span class="nav-text">共享库的安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-number">5.4.</span> <span class="nav-text">共享库的构造和析构函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E8%84%9A%E6%9C%AC"><span class="nav-number">5.5.</span> <span class="nav-text">共享库脚本</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hbinnn"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hbinnn</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hbinnn" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hbinnn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lx1003129759@gmail.com" title="E-Mail → mailto:lx1003129759@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hbinnn</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">94k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:51</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

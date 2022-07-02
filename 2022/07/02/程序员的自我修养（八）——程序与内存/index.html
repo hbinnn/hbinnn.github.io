@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介程序运行过程中的内存布局。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员的自我修养（八）——程序与内存">
+<meta property="og:url" content="http://hbinnn.github.io/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AB%EF%BC%89%E2%80%94%E2%80%94%E7%A8%8B%E5%BA%8F%E4%B8%8E%E5%86%85%E5%AD%98/index.html">
+<meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="简介程序运行过程中的内存布局。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418221505375.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418223900794.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418234554522.png">
+<meta property="article:published_time" content="2022-07-02T10:06:17.000Z">
+<meta property="article:modified_time" content="2022-07-02T10:07:17.731Z">
+<meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="读书笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418221505375.png">
+
+<link rel="canonical" href="http://hbinnn.github.io/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AB%EF%BC%89%E2%80%94%E2%80%94%E7%A8%8B%E5%BA%8F%E4%B8%8E%E5%86%85%E5%AD%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序员的自我修养（八）——程序与内存 | hbinnn's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-46K30KQ5B2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hbinnn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E5%85%AB%EF%BC%89%E2%80%94%E2%80%94%E7%A8%8B%E5%BA%8F%E4%B8%8E%E5%86%85%E5%AD%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hbinnn">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hbinnn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序员的自我修养（八）——程序与内存
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-07-02 18:06:17 / 修改时间：18:07:17" itemprop="dateCreated datePublished" datetime="2022-07-02T18:06:17+08:00">2022-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">编译原理</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+            <div class="post-description">简介程序运行过程中的内存布局。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="程序的内存布局"><a href="#程序的内存布局" class="headerlink" title="程序的内存布局"></a>程序的内存布局</h2><p>每个程序在运行后都会分配一个虚拟地址空间。在 32 位的机器上，这个空间为 4 GB。在 Linux 上，这 4 GB 的地址空间中，高地址的 1 GB 分配给内核，剩下的为用户空间。</p>
+<p>在用户空间中，默认情况有如下划分：</p>
+<ul>
+<li>栈：用于维护函数调用的上下文，通常在用户空间的最高地址处分配，向低地址方向增长；</li>
+<li>堆：用于程序动态分配内存的区域，通常位于用于空间的低地址区域，向高地址方向增长；</li>
+<li>可执行文件与映像：程序装载后映射的位置；</li>
+<li>保留区：内存中受到保护而禁止访问的内存区域总称；</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418221505375.png" alt="image-20220418221505375"></p>
+<h2 id="栈与调用惯例"><a href="#栈与调用惯例" class="headerlink" title="栈与调用惯例"></a>栈与调用惯例</h2><p>通常情况下，栈的增长方向是由高地址空间向低地址空间增长，栈顶由 esp 寄存器保存。</p>
+<p>在函数调用的过程中，栈用于保存函数调用需要维护的信息，被称为堆栈帧，通常包含这些信息：</p>
+<ul>
+<li>函数的返回地址和参数；</li>
+<li>临时变量；</li>
+<li>程序上下文，包括在函数调用前后需要保持不变的寄存器；</li>
+</ul>
+<p>一个堆栈帧用 esp 和 ebp 两个寄存器来确定。esp 始终指向栈顶，ebp 则指向堆栈帧中一个相对固定的位置。</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418223900794.png" alt="image-20220418223900794"></p>
+<p>以下面这个函数为例，反汇编查看汇编代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> sum = add(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">0000000000001129 &lt;add&gt;:</span><br><span class="line">    1129:       f3 0f 1e fa             endbr64 </span><br><span class="line">    112d:       55                      push   %rbp</span><br><span class="line">    112e:       48 89 e5                mov    %rsp,%rbp</span><br><span class="line">    1131:       89 7d fc                mov    %edi,-0x4(%rbp)</span><br><span class="line">    1134:       89 75 f8                mov    %esi,-0x8(%rbp)</span><br><span class="line">    1137:       8b 55 fc                mov    -0x4(%rbp),%edx</span><br><span class="line">    113a:       8b 45 f8                mov    -0x8(%rbp),%eax</span><br><span class="line">    113d:       01 d0                   add    %edx,%eax</span><br><span class="line">    113f:       5d                      pop    %rbp</span><br><span class="line">    1140:       c3                      retq   </span><br><span class="line"></span><br><span class="line">0000000000001141 &lt;main&gt;:</span><br><span class="line">    1141:       f3 0f 1e fa             endbr64 </span><br><span class="line">    1145:       55                      push   %rbp</span><br><span class="line">    1146:       48 89 e5                mov    %rsp,%rbp</span><br><span class="line">    1149:       48 83 ec 10             sub    $0x10,%rsp</span><br><span class="line">    114d:       be 02 00 00 00          mov    $0x2,%esi</span><br><span class="line">    1152:       bf 01 00 00 00          mov    $0x1,%edi</span><br><span class="line">    1157:       e8 cd ff ff ff          callq  1129 &lt;add&gt;</span><br><span class="line">    115c:       89 45 fc                mov    %eax,-0x4(%rbp)</span><br><span class="line">    115f:       b8 00 00 00 00          mov    $0x0,%eax</span><br><span class="line">    1164:       c9                      leaveq </span><br><span class="line">    1165:       c3                      retq   </span><br><span class="line">    1166:       66 2e 0f 1f 84 00 00    nopw   %cs:0x0(%rax,%rax,1)</span><br><span class="line">    116d:       00 00 00 </span><br></pre></td></tr></table></figure>
+
+<p>从 main 函数开始，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1145:       55                      push   %rbp</span><br><span class="line">1146:       48 89 e5                mov    %rsp,%rbp</span><br></pre></td></tr></table></figure>
+
+<p>保存 ebp，将 ebp 指向当前栈顶，即 esp。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1149:       48 83 ec 10             sub    $0x10,%rsp</span><br></pre></td></tr></table></figure>
+
+<p>开辟一个 16 字节的空间，用于存放临时变量1，2。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">114d:       be 02 00 00 00          mov    $0x2,%esi</span><br><span class="line">1152:       bf 01 00 00 00          mov    $0x1,%edi</span><br></pre></td></tr></table></figure>
+
+<p>将两个临时变量 1，2 分别赋值给 edi、esi。</p>
+<p>接下来调用 add 函数。callq 指令会将下一条指令的地址压入栈，函数调用结束后调到该地址继续执行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">112d:       55                      push   %rbp</span><br><span class="line">112e:       48 89 e5                mov    %rsp,%rbp</span><br></pre></td></tr></table></figure>
+
+<p>同样先保存 ebp，更新 ebp 指向 esp。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1131:       89 7d fc                mov    %edi,-0x4(%rbp)</span><br><span class="line">1134:       89 75 f8                mov    %esi,-0x8(%rbp)</span><br></pre></td></tr></table></figure>
+
+<p>将 edi、esi 寄存器中的值赋给 ebp - 0x4，ebp - 0x8 的空间，即刚刚在 main 函数中开辟的 16 字节的空间。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1137:       8b 55 fc                mov    -0x4(%rbp),%edx</span><br><span class="line">113a:       8b 45 f8                mov    -0x8(%rbp),%eax</span><br><span class="line">113d:       01 d0                   add    %edx,%eax</span><br></pre></td></tr></table></figure>
+
+<p>将两个参数分别赋值给 edx、eax，并相加后将结果赋值给 eax</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">113f:       5d                      pop    %rbp</span><br></pre></td></tr></table></figure>
+
+<p>将上一堆栈帧的 ebp 弹出，赋值给 ebp 寄存器。</p>
+<p>回到 main 函数。调到 callq 压入的 115c 地址处继续执行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">115c:       89 45 fc                mov    %eax,-0x4(%rbp)</span><br><span class="line">115f:       b8 00 00 00 00          mov    $0x0,%eax</span><br></pre></td></tr></table></figure>
+
+<p>将返回值 eax 赋值给 ebp - 0x4 的位置，保存在刚刚开辟的 16 字节空间中的 4 个字节。</p>
+<p>将 eax 赋值为 0。</p>
+<h3 id="函数的调用惯例"><a href="#函数的调用惯例" class="headerlink" title="函数的调用惯例"></a>函数的调用惯例</h3><p>函数的调用方与被调方需要约定参数是如何压栈的，这样的约定就称为调用惯例。通常包含以下内容：</p>
+<ul>
+<li>函数参数的传递顺序和方式；</li>
+<li>栈的维护方式；</li>
+<li>名字修饰的策略：不同的调用惯例有不同的修饰策略；C 语言默认的调用惯例是 cdecl，即从右向左的顺序压参数入栈，有函数调用方做完成栈弹出的工作。在 gcc 中可以通过 __attribute__((cdecl)) 的方式声明函数的调用管理。</li>
+</ul>
+<blockquote>
+<p>其他的调用管理：</p>
+<p><img src="https://raw.githubusercontent.com/hbinnn/Pictures/master/image-20220418234554522.png" alt="image-20220418234554522"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag"># 读书笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B8%83%EF%BC%89%E2%80%94%E2%80%94Linux%E5%85%B1%E4%BA%AB%E5%BA%93%E7%9A%84%E7%BB%84%E7%BB%87/" rel="prev" title="程序员的自我修养（七）——Linux共享库的组织">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养（七）——Linux共享库的组织
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B9%9D%EF%BC%89%E2%80%94%E2%80%94%E5%85%A5%E5%8F%A3%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A8%8B%E5%BA%8F%E5%88%9D%E5%A7%8B%E5%8C%96/" rel="next" title="程序员的自我修养（九）——入口函数与程序初始化">
+      程序员的自我修养（九）——入口函数与程序初始化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80"><span class="nav-number">1.</span> <span class="nav-text">程序的内存布局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%88%E4%B8%8E%E8%B0%83%E7%94%A8%E6%83%AF%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">栈与调用惯例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E8%B0%83%E7%94%A8%E6%83%AF%E4%BE%8B"><span class="nav-number">2.1.</span> <span class="nav-text">函数的调用惯例</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hbinnn"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hbinnn</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hbinnn" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hbinnn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lx1003129759@gmail.com" title="E-Mail → mailto:lx1003129759@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hbinnn</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">94k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:51</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

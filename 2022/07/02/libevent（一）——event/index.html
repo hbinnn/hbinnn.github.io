@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hbinnn.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简介libevent中关于event结构的使用方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="libevent（一）——event">
+<meta property="og:url" content="http://hbinnn.github.io/2022/07/02/libevent%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94event/index.html">
+<meta property="og:site_name" content="hbinnn&#39;s Blog">
+<meta property="og:description" content="简介libevent中关于event结构的使用方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-02T10:09:20.000Z">
+<meta property="article:modified_time" content="2022-07-02T10:11:08.383Z">
+<meta property="article:author" content="hbinnn">
+<meta property="article:tag" content="libevent">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://hbinnn.github.io/2022/07/02/libevent%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94event/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>libevent（一）——event | hbinnn's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-46K30KQ5B2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-46K30KQ5B2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hbinnn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hbinnn.github.io/2022/07/02/libevent%EF%BC%88%E4%B8%80%EF%BC%89%E2%80%94%E2%80%94event/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="hbinnn">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hbinnn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          libevent（一）——event
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-07-02 18:09:20 / 修改时间：18:11:08" itemprop="dateCreated datePublished" datetime="2022-07-02T18:09:20+08:00">2022-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E6%BA%90%E4%BB%A3%E7%A0%81%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">开源代码学习</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+            <div class="post-description">简介libevent中关于event结构的使用方法。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>libevent 提供了一系列用于事件驱动编程的 API，这些事件可以是用户自定义的事件、信号量、或者是超时事件。</p>
+<p>libevent 底层使用的是 epoll、select、poll、kqueue 等多路IO复用方法，能够很好地多个平台之间移植代码。</p>
+<p>既然是事件驱动，那么 libevent 的基本操作单元就是事件，在代码中就是 event 结构体。</p>
+<p>每个 event 都代表着一些事件，例如：</p>
+<ul>
+<li>一个 fd 可以被读取或写入；</li>
+<li>超时事件；</li>
+<li>信号量；</li>
+<li>用户触发的事件；</li>
+</ul>
+<h4 id="申请和释放-event"><a href="#申请和释放-event" class="headerlink" title="申请和释放 event"></a>申请和释放 event</h4><p>libevent 提供了一些 API 用于创建和释放 event：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EV_TIMEOUT      0x01</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EV_READ         0x02</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EV_WRITE        0x04</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EV_SIGNAL       0x08</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EV_PERSIST      0x10</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EV_ET           0x20</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*event_callback_fn)</span><span class="params">(<span class="keyword">evutil_socket_t</span>, <span class="keyword">short</span>, <span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">struct event *<span class="title">event_new</span><span class="params">(struct event_base *base, <span class="keyword">evutil_socket_t</span> fd,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">short</span> what, event_callback_fn cb,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">void</span> *arg)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">event_free</span><span class="params">(struct event *event)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_assign</span><span class="params">(struct event *event, struct event_base *base,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">evutil_socket_t</span> fd, <span class="keyword">short</span> what,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">void</span> (*callback)(<span class="keyword">evutil_socket_t</span>, <span class="keyword">short</span>, <span class="keyword">void</span> *), <span class="keyword">void</span> *arg)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>event_base 是持有管理 event 的，下一章节介绍。</p>
+<p><code>event_new</code> 用于申请 event 结构体，并将其关联到给定 event_base 中，fd 和 what 决定了 event 触发的条件，cb 则是 event 触发时需要执行的动作，arg 将会在 cb 执行时传递给 cb。</p>
+<p>what 可以是以下某一种或几种的组合：</p>
+<ul>
+<li>EV_TIMEOUT：event 关注超时事件，此时 fd 必须为 -1；</li>
+<li>EV_READ：event 关注读取事件；</li>
+<li>EV_WRITE：event 关注写入事件；</li>
+<li>EV_SIGNAL：event 关注信号量，此时 fd 是一个信号量；</li>
+<li>EV_PERSIST：指明 event 是 presistent 的，在没有指定 EV_PERSIST 时，event 被触发后就不再是pending 状态，需要手动调用 <code>event_add</code> 使其重新变为 pending 状态。</li>
+<li>EV_ET：event 是边缘触发的；</li>
+<li>EV_FINALIZE：</li>
+<li>EV_CLOSED：连接关闭事件；</li>
+</ul>
+<p>cb 在 event 触发后会传入三个参数进行调用，fd 是创建是给定的 fd，what 是指明 event 触发的事件类型，arg 是创建是给定的 arg。</p>
+<p>当使用 <code>event_new</code> 并且 arg 参数希望传递 event 自身时，可以在 arg 参数上传入 <code>event_self_cbarg</code> 函数来标明 arg 参数是 event 自身。</p>
+<p><code>event_free</code> 相应的用于释放 <code>event_new</code> 申请的 event。</p>
+<p><code>event_assign</code> 则是用于初始化 event 结构，而 event 的内存需要使用方自行申请和释放。</p>
+<h4 id="调度-event"><a href="#调度-event" class="headerlink" title="调度 event"></a>调度 event</h4><p>在申请完 event 后，需要将其加入到 event_base 的监控事件中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_add</span><span class="params">(struct event *ev, <span class="keyword">const</span> struct timeval *tv)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_del</span><span class="params">(struct event *ev)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>event_add</code> 将 ev 事件加入监控事件中，ev 的状态将会变为 pending。如果 tv 设置，那么同样会为 ev 设置超时事件。</p>
+<p><code>event_del</code> 则将一个 ev 事件从监控事件中移除，ev 将不再是 pending 状态。如果一个 ev 已经被触发，但是在执行其 cb 回调前被移除，则 cb 依然不会被执行。 </p>
+<h4 id="移除-timeout"><a href="#移除-timeout" class="headerlink" title="移除 timeout"></a>移除 timeout</h4><p>libevent 提供了接口用于移除 ev 事件的超时事件而不影响其他事件。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_remove_timer</span><span class="params">(struct event *ev)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="手动触发-event"><a href="#手动触发-event" class="headerlink" title="手动触发 event"></a>手动触发 event</h4><p>如果希望手动触发 event 事件，libevent 提供了接口来实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">event_active</span><span class="params">(struct event *ev, <span class="keyword">int</span> what, <span class="keyword">short</span> ncalls)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>ev 是要触发的事件，what 则指明了触发类型，只能是 EV_READ、EV_WRITE、EV_TIMEOUT 中的一种或几种。ncalls 参数没用。</p>
+<p>尽量不要在 ev 的 cb 中调用，很有可能会造成资源耗尽。</p>
+<h4 id="event-优先级"><a href="#event-优先级" class="headerlink" title="event 优先级"></a>event 优先级</h4><p>event 可以设置优先级，当多个事件被同时触发时，优先执行优先级高的事件。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_priority_set</span><span class="params">(struct event *event, <span class="keyword">int</span> priority)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>priority 需要在 event_base 所指定的优先级范围内，后续会提到。</p>
+<h4 id="一次性-event-事件"><a href="#一次性-event-事件" class="headerlink" title="一次性 event 事件"></a>一次性 event 事件</h4><p>如果某个事件只需要触发一次，libevent 提供了接口来实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_base_once</span><span class="params">(struct event_base *, <span class="keyword">evutil_socket_t</span>, <span class="keyword">short</span>, <span class="keyword">void</span> (*)(<span class="keyword">evutil_socket_t</span>, <span class="keyword">short</span>, <span class="keyword">void</span> *), <span class="keyword">void</span> *, <span class="keyword">const</span> struct timeval *)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>libevent 将在内部为其申请 event 接口并在触发后将其释放。<code>event_base_once</code> 不支持触发类型为 EV_PERSIST、EV_SIGNAL。通过 <code>event_base_once</code> 创建的事件无法被手动触发，也不能通过 <code>evevnt_del</code> 删除。</p>
+<h4 id="获取-event-的状态"><a href="#获取-event-的状态" class="headerlink" title="获取 event 的状态"></a>获取 event 的状态</h4><p>libevent 提供了一系列 API 来获取 event 的状态、创建时的参数等。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_pending</span><span class="params">(<span class="keyword">const</span> struct event *ev, <span class="keyword">short</span> what, struct timeval *tv_out)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> event_get_signal(ev) <span class="comment">/* ... */</span></span></span><br><span class="line"><span class="function"><span class="keyword">evutil_socket_t</span> <span class="title">event_get_fd</span><span class="params">(<span class="keyword">const</span> struct event *ev)</span></span>;</span><br><span class="line"><span class="function">struct event_base *<span class="title">event_get_base</span><span class="params">(<span class="keyword">const</span> struct event *ev)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">short</span> <span class="title">event_get_events</span><span class="params">(<span class="keyword">const</span> struct event *ev)</span></span>;</span><br><span class="line"><span class="function">event_callback_fn <span class="title">event_get_callback</span><span class="params">(<span class="keyword">const</span> struct event *ev)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">event_get_callback_arg</span><span class="params">(<span class="keyword">const</span> struct event *ev)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">event_get_priority</span><span class="params">(<span class="keyword">const</span> struct event *ev)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">event_get_assignment</span><span class="params">(<span class="keyword">const</span> struct event *event,</span></span></span><br><span class="line"><span class="params"><span class="function">        struct event_base **base_out,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">evutil_socket_t</span> *fd_out,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">short</span> *events_out,</span></span></span><br><span class="line"><span class="params"><span class="function">        event_callback_fn *callback_out,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">void</span> **arg_out)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h4><p>通过 event 检测键盘输入并回显，每等待1s打印一次超时。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;event2/event.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAXLINE 1024</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">echo_cb</span><span class="params">(<span class="keyword">evutil_socket_t</span> fd, <span class="keyword">short</span> what, <span class="keyword">void</span> *arg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">ssize_t</span> n;</span><br><span class="line">    <span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (what &amp; EV_READ) &#123;</span><br><span class="line">        <span class="keyword">if</span> ((n = read(fd, buf, <span class="keyword">sizeof</span>(buf) - <span class="number">1</span>)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            buf[n] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;receive: %s\n&quot;</span>, buf);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (what &amp; EV_TIMEOUT) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;timeout\n&quot;</span>);</span><br><span class="line">        <span class="comment">// event_remove_timer((struct event *)arg);</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">event_base</span> *<span class="title">base</span> =</span> event_base_new();</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">event</span> *<span class="title">ev</span> =</span> event_new(base, fileno(<span class="built_in">stdin</span>),</span><br><span class="line">        EV_READ|EV_PERSIST, echo_cb, event_self_cbarg());</span><br><span class="line">    </span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> <span class="title">tv</span> =</span> &#123;</span><br><span class="line">        .tv_sec = <span class="number">1</span>,</span><br><span class="line">        .tv_usec = <span class="number">0</span>,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// event_active(ev, EV_TIMEOUT, 0);</span></span><br><span class="line">    event_add(ev, &amp;tv);</span><br><span class="line"></span><br><span class="line">    event_base_dispatch(base);</span><br><span class="line">    event_free(ev);</span><br><span class="line">    event_base_free(base);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/libevent/" rel="tag"># libevent</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/07/02/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%EF%BC%88%E4%B9%9D%EF%BC%89%E2%80%94%E2%80%94%E5%85%A5%E5%8F%A3%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A8%8B%E5%BA%8F%E5%88%9D%E5%A7%8B%E5%8C%96/" rel="prev" title="程序员的自我修养（九）——入口函数与程序初始化">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养（九）——入口函数与程序初始化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/02/libevent%EF%BC%88%E4%BA%8C%EF%BC%89%E2%80%94%E2%80%94event-base/" rel="next" title="libevent（二）——event_base">
+      libevent（二）——event_base <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B3%E8%AF%B7%E5%92%8C%E9%87%8A%E6%94%BE-event"><span class="nav-number">1.</span> <span class="nav-text">申请和释放 event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6-event"><span class="nav-number">2.</span> <span class="nav-text">调度 event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E9%99%A4-timeout"><span class="nav-number">3.</span> <span class="nav-text">移除 timeout</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E8%A7%A6%E5%8F%91-event"><span class="nav-number">4.</span> <span class="nav-text">手动触发 event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#event-%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">5.</span> <span class="nav-text">event 优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E6%AC%A1%E6%80%A7-event-%E4%BA%8B%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">一次性 event 事件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-event-%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">7.</span> <span class="nav-text">获取 event 的状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">8.</span> <span class="nav-text">示例</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hbinnn"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">hbinnn</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hbinnn" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hbinnn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lx1003129759@gmail.com" title="E-Mail → mailto:lx1003129759@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hbinnn</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">94k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:51</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
